@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\InternalOperations.Domain\InternalOperations.Domain.csproj" />
+    <ProjectReference Include="..\InternalOperations.Shared\InternalOperations.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

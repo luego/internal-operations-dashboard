@@ -1,0 +1,42 @@
+# .NET build outputs
+**/bin/
+**/obj/
+artifacts/
+
+# Test results and coverage
+TestResults/
+**/TestResults/
+coverage/
+coverage.*
+*.trx
+
+# IDE and editors
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local tools and caches
+.dotnet/
+.store/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.snk
+
+# Operating systems
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*~

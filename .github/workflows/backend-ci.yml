@@ -1,0 +1,63 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation:
+    name: Foundation checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET from global.json
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      - name: Restore local tools
+        run: dotnet tool restore
+
+      - name: Restore packages
+        run: dotnet restore InternalOperations.slnx --locked-mode
+
+      - name: Verify formatting
+        run: dotnet format InternalOperations.slnx --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build InternalOperations.slnx --configuration Release --no-restore -p:ContinuousIntegrationBuild=true
+
+      - name: Test
+        run: >-
+          dotnet test InternalOperations.slnx
+          --configuration Release
+          --no-build
+          --no-restore
+          --logger "trx;LogFilePrefix=foundation"
+          --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: foundation-test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: error
+          retention-days: 14

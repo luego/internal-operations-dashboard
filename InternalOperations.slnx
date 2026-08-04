@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/InternalOperations.Api/InternalOperations.Api.csproj" />
+    <Project Path="src/InternalOperations.Application/InternalOperations.Application.csproj" />
+    <Project Path="src/InternalOperations.Domain/InternalOperations.Domain.csproj" />
+    <Project Path="src/InternalOperations.Infrastructure/InternalOperations.Infrastructure.csproj" />
+    <Project Path="src/InternalOperations.Persistence/InternalOperations.Persistence.csproj" />
+    <Project Path="src/InternalOperations.Shared/InternalOperations.Shared.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/InternalOperations.Api.IntegrationTests/InternalOperations.Api.IntegrationTests.csproj" />
+    <Project Path="tests/InternalOperations.Application.UnitTests/InternalOperations.Application.UnitTests.csproj" />
+    <Project Path="tests/InternalOperations.ArchitectureTests/InternalOperations.ArchitectureTests.csproj" />
+    <Project Path="tests/InternalOperations.Domain.UnitTests/InternalOperations.Domain.UnitTests.csproj" />
+    <Project Path="tests/InternalOperations.Persistence.IntegrationTests/InternalOperations.Persistence.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

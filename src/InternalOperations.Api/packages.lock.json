@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "internaloperations.application": {
+        "type": "Project",
+        "dependencies": {
+          "InternalOperations.Domain": "[1.0.0, )",
+          "InternalOperations.Shared": "[1.0.0, )"
+        }
+      },
+      "internaloperations.domain": {
+        "type": "Project"
+      },
+      "internaloperations.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "InternalOperations.Application": "[1.0.0, )",
+          "InternalOperations.Shared": "[1.0.0, )"
+        }
+      },
+      "internaloperations.persistence": {
+        "type": "Project",
+        "dependencies": {
+          "InternalOperations.Application": "[1.0.0, )",
+          "InternalOperations.Domain": "[1.0.0, )",
+          "InternalOperations.Shared": "[1.0.0, )"
+        }
+      },
+      "internaloperations.shared": {
+        "type": "Project"
+      }
+    }
+  }
+}
