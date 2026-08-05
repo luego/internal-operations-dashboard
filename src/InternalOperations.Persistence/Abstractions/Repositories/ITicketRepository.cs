@@ -1,4 +1,4 @@
-using InternalOperations.Domain.Entities;
+using InternalOperations.Domain.Tickets;
 
 namespace InternalOperations.Persistence.Abstractions;
 

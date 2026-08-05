@@ -1,4 +1,4 @@
-using InternalOperations.Domain.Entities;
+using InternalOperations.Domain.Tickets;
 using InternalOperations.Persistence.Abstractions;
 using InternalOperations.Persistence.Context;
 using Microsoft.EntityFrameworkCore;

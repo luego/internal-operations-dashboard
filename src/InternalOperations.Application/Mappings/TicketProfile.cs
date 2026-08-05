@@ -1,6 +1,6 @@
 using AutoMapper;
 using InternalOperations.Application.DTOs;
-using InternalOperations.Domain.Entities;
+using InternalOperations.Domain.Tickets;
 
 namespace InternalOperations.Application.Mappings;
 

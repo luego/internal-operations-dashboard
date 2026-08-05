@@ -1,7 +1,7 @@
 using AutoMapper;
 using InternalOperations.Application.Abstractions.Services;
 using InternalOperations.Application.DTOs;
-using InternalOperations.Domain.Entities;
+using InternalOperations.Domain.Tickets;
 using InternalOperations.Persistence.Abstractions;
 
 namespace InternalOperations.Application.Services;

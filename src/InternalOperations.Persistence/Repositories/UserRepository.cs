@@ -1,4 +1,4 @@
-using InternalOperations.Domain.Entities;
+using InternalOperations.Domain.Users;
 using InternalOperations.Persistence.Abstractions;
 using InternalOperations.Persistence.Context;
 

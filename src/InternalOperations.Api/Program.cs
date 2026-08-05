@@ -13,7 +13,6 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-// 2. Add standard Problem Details support 
 builder.Services.AddProblemDetails();
 var app = builder.Build();
 
