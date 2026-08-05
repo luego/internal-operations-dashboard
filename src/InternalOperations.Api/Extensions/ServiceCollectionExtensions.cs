@@ -8,7 +8,7 @@ using InternalOperations.Persistence.Context;
 using InternalOperations.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace InternalOperations.Api;
+namespace InternalOperations.Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {

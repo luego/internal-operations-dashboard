@@ -1,5 +1,5 @@
-using InternalOperations.Api;
 using InternalOperations.Api.ErrorHandling;
+using InternalOperations.Api.Extensions;
 using InternalOperations.Application.Mappings;
 using Scalar.AspNetCore;
 
