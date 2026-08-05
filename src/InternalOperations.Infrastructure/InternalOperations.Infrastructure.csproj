@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\InternalOperations.Application\InternalOperations.Application.csproj" />
     <ProjectReference Include="..\InternalOperations.Shared\InternalOperations.Shared.csproj" />
   </ItemGroup>

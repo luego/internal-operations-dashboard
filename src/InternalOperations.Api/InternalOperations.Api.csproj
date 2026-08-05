@@ -7,4 +7,14 @@
     <ProjectReference Include="..\InternalOperations.Shared\InternalOperations.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="MediatR" />
+  </ItemGroup>
+
 </Project>
