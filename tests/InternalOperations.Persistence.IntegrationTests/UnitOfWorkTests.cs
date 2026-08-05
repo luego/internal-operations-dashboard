@@ -18,7 +18,7 @@ public sealed class UnitOfWorkTests
         //var repository = new GenericRepository<TestEntity>(context);
         var unitOfWork = new UnitOfWork(context, new TicketRepository(context), new UserRepository(context));
 
-        await unitOfWork.Tickets.AddAsync(new Domain.Entities.Ticket { Title = "Alpha" });
+        await unitOfWork.Tickets.AddAsync(new Domain.Tickets.Ticket { Title = "Alpha" });
         await unitOfWork.SaveChangesAsync();
 
         var stored = await context.TestEntities.SingleAsync();
