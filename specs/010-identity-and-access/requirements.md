@@ -1,9 +1,10 @@
 # 010 — Identity and Access: Requirements
 
-**Estado:** Proposed
+**Estado:** Approved
 **Fecha:** 6 de agosto de 2026
+**Aprobada:** 6 de agosto de 2026
 **Basado en:** Fase 2 del documento maestro: Identidad y seguridad
-**Gate:** Requiere aprobación de `requirements.md`, `design.md` y `tasks.md` antes de modificar código o esquema.
+**Gate:** Aprobado por el usuario el 6 de agosto de 2026.
 
 ## 1. Objetivo
 

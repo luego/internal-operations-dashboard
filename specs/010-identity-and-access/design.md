@@ -1,9 +1,10 @@
 # 010 — Identity and Access: Design
 
-**Estado:** Proposed
+**Estado:** Approved
 **Requisitos:** `requirements.md`
 **Fecha:** 6 de agosto de 2026
-**Gate:** No implementar hasta aprobar los tres artefactos de la spec.
+**Aprobada:** 6 de agosto de 2026
+**Gate:** Aprobado por el usuario el 6 de agosto de 2026.
 
 ## 1. Resumen
 

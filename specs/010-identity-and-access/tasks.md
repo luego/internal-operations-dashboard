@@ -1,7 +1,8 @@
 # 010 — Identity and Access: Tasks
 
-**Estado:** Proposed
+**Estado:** Approved
 **Fecha:** 6 de agosto de 2026
+**Aprobada:** 6 de agosto de 2026
 **Requisitos:** `requirements.md`
 **Diseño:** `design.md`
 
@@ -15,7 +16,8 @@
 
 ## Gate 0 — Aprobación
 
-- [ ] **GATE-SEC-000 Aprobar requirements, design y tasks**
+- [x] **GATE-SEC-000 Aprobar requirements, design y tasks**
+  - Aprobado por el usuario sin cambios el 6 de agosto de 2026.
   - Confirmar las siete decisiones de `requirements.md` sección 7.
   - Registrar cualquier cambio de contrato antes de implementar.
   - Salida observable: los tres artefactos pasan de `Proposed` a `Approved` en un commit documental.
