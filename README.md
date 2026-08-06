@@ -4,6 +4,8 @@ Backend-first internal operations system for tickets, departments, users, commen
 
 The repository has completed **phase 1: application and persistence foundation**. It contains the project boundaries, cross-cutting application primitives, EF Core persistence adapters, dual-provider composition and a minimal ticket-creation endpoint that validates the vertical architecture.
 
+The next increment, **phase 2: identity and access**, is documented as a proposed spec and remains behind its approval gate. No identity or authentication implementation is implied until that gate is closed.
+
 ## Prerequisites
 
 - .NET SDK compatible with `global.json` (`10.0.3xx`; latest patch)
@@ -64,6 +66,9 @@ Shared <- stable technical primitives only
 - [Application and persistence requirements](specs/005-application-and-persistence-foundation/requirements.md)
 - [Application and persistence design](specs/005-application-and-persistence-foundation/design.md)
 - [Application and persistence tasks and evidence](specs/005-application-and-persistence-foundation/tasks.md)
+- [Proposed identity and access requirements](specs/010-identity-and-access/requirements.md)
+- [Proposed identity and access design](specs/010-identity-and-access/design.md)
+- [Proposed identity and access tasks](specs/010-identity-and-access/tasks.md)
 - [Architecture decision records](docs/adr/)
 
 Changes are developed from an approved feature spec. Requirements, design, tasks, tests and evidence must remain synchronized. Frontend work is outside the current backend scope.
