@@ -6,6 +6,12 @@ namespace InternalOperations.Api.ErrorHandling;
 public sealed class GlobalExceptionHandler
     : IExceptionHandler
 {
+    private static readonly Action<ILogger, Exception> LogUnhandledException =
+        LoggerMessage.Define(
+            LogLevel.Error,
+            new EventId(1, nameof(GlobalExceptionHandler)),
+            "An unhandled exception occurred");
+
     private readonly ILogger<GlobalExceptionHandler> _logger;
 
     public GlobalExceptionHandler(
@@ -19,9 +25,7 @@ public sealed class GlobalExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(
-            exception,
-            "An unhandled exception occurred");
+        LogUnhandledException(_logger, exception);
 
         var problemDetails = new ProblemDetails
         {

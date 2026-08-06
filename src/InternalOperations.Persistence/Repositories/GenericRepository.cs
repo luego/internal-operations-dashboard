@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
+using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Domain.Common;
-using InternalOperations.Persistence.Abstractions;
 using InternalOperations.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,8 +9,8 @@ namespace InternalOperations.Persistence;
 public class GenericRepository<TEntity> : IRepository<TEntity>
     where TEntity : BaseEntity
 {
-    protected readonly ApplicationDbContext Context;
-    protected readonly DbSet<TEntity> Entities;
+    protected ApplicationDbContext Context { get; }
+    protected DbSet<TEntity> Entities { get; }
 
     public GenericRepository(ApplicationDbContext context)
     {
@@ -91,7 +91,9 @@ public class GenericRepository<TEntity> : IRepository<TEntity>
 
     public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
     {
-        return await Entities.CountAsync(predicate, cancellationToken);
+        return predicate is null
+            ? await Entities.CountAsync(cancellationToken)
+            : await Entities.CountAsync(predicate, cancellationToken);
     }
 
     public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)

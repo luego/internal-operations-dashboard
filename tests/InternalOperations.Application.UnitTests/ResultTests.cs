@@ -31,7 +31,9 @@ public sealed class ResultTests
 
         Assert.False(result.IsSuccess);
         Assert.Single(result.Errors);
-        Assert.Equal("ITEM_REQUIRED", result.Errors[0].Code);
-        Assert.Equal(ErrorType.Validation, result.Errors[0].Type);
+        Assert.NotNull(result.Error);
+        Assert.Same(result.Errors[0], result.Error);
+        Assert.Equal("ITEM_REQUIRED", result.Error.Code);
+        Assert.Equal(ErrorType.Validation, result.Error.Type);
     }
 }

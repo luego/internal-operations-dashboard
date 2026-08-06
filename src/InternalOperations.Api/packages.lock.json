@@ -218,7 +218,6 @@
         "dependencies": {
           "AutoMapper": "[16.2.0, )",
           "InternalOperations.Domain": "[1.0.0, )",
-          "InternalOperations.Persistence": "[1.0.0, )",
           "InternalOperations.Shared": "[1.0.0, )",
           "MediatR": "[14.2.0, )"
         }
@@ -236,6 +235,7 @@
       "internaloperations.persistence": {
         "type": "Project",
         "dependencies": {
+          "InternalOperations.Application": "[1.0.0, )",
           "InternalOperations.Domain": "[1.0.0, )",
           "InternalOperations.Shared": "[1.0.0, )",
           "Microsoft.EntityFrameworkCore": "[10.0.10, )",

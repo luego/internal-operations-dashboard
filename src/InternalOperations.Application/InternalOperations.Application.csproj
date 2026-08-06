@@ -10,7 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../InternalOperations.Persistence/InternalOperations.Persistence.csproj" />
     <ProjectReference Include="..\InternalOperations.Domain\InternalOperations.Domain.csproj" />
     <ProjectReference Include="..\InternalOperations.Shared\InternalOperations.Shared.csproj" />
   </ItemGroup>

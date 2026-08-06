@@ -1,32 +1,25 @@
 using AutoMapper;
+using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Application.Abstractions.Services;
 using InternalOperations.Application.DTOs;
 using InternalOperations.Domain.Tickets;
-using InternalOperations.Persistence.Abstractions;
 
 namespace InternalOperations.Application.Services;
 
 public sealed class TicketService : ITicketService
 {
+    private readonly IRepository<Ticket> _ticketRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
     public TicketService(
+        IRepository<Ticket> ticketRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _ticketRepository = ticketRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
-    }
-
-    public Task<Result> AssignAsync(Guid ticketId, Guid userId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Result> CloseAsync(Guid ticketId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<Result<TicketDto>> CreateAsync(
@@ -35,7 +28,7 @@ public sealed class TicketService : ITicketService
     {
         var ticket = _mapper.Map<Ticket>(dto);
 
-        await _unitOfWork.Tickets.AddAsync(
+        await _ticketRepository.AddAsync(
             ticket,
             cancellationToken);
 
@@ -46,13 +39,4 @@ public sealed class TicketService : ITicketService
             _mapper.Map<TicketDto>(ticket));
     }
 
-    public Task<Result> DeleteAsync(Guid id, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Result<TicketDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 }

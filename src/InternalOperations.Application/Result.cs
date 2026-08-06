@@ -29,6 +29,7 @@ public abstract class Result
     {
         IsSuccess = isSuccess;
         Errors = errors;
+        Error = errors.Count > 0 ? errors[0] : null;
     }
 
     public bool IsSuccess { get; }

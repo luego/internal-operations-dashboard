@@ -1,6 +1,5 @@
-using InternalOperations.Domain.Common;
+using InternalOperations.Domain.Tickets;
 using InternalOperations.Persistence.Context;
-using InternalOperations.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace InternalOperations.Persistence.IntegrationTests;
@@ -15,13 +14,12 @@ public sealed class UnitOfWorkTests
             .Options;
 
         await using var context = new TestApplicationDbContext(options);
-        //var repository = new GenericRepository<TestEntity>(context);
-        var unitOfWork = new UnitOfWork(context, new TicketRepository(context), new UserRepository(context));
+        var unitOfWork = new UnitOfWork(context);
 
-        await unitOfWork.Tickets.AddAsync(new Domain.Tickets.Ticket { Title = "Alpha" });
+        await context.Tickets.AddAsync(new Ticket { Title = "Alpha" });
         await unitOfWork.SaveChangesAsync();
 
-        var stored = await context.TestEntities.SingleAsync();
+        var stored = await context.Tickets.SingleAsync();
         Assert.Equal("Alpha", stored.Title);
     }
 
@@ -32,18 +30,5 @@ public sealed class UnitOfWorkTests
         {
         }
 
-        public DbSet<TestEntity> TestEntities { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<TestEntity>().HasKey(x => x.Id);
-        }
-    }
-
-    private sealed class TestEntity : BaseEntity
-    {
-
-        public string Title { get; set; } = string.Empty;
     }
 }

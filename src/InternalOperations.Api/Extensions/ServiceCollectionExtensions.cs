@@ -1,11 +1,10 @@
 using InternalOperations.Application;
+using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Application.Abstractions.Services;
 using InternalOperations.Application.Services;
 using InternalOperations.Infrastructure;
 using InternalOperations.Persistence;
-using InternalOperations.Persistence.Abstractions;
 using InternalOperations.Persistence.Context;
-using InternalOperations.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace InternalOperations.Api.Extensions;
@@ -53,8 +52,6 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
-        services.AddScoped<ITicketRepository, TicketRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
 
         return services;
     }

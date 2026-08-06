@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using InternalOperations.Domain.Common;
 
-namespace InternalOperations.Persistence.Abstractions;
+namespace InternalOperations.Application.Abstractions.Persistence;
 
 public interface IRepository<TEntity>
     where TEntity : BaseEntity
