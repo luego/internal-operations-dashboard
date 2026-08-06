@@ -1,6 +1,7 @@
 using InternalOperations.Api.ErrorHandling;
 using InternalOperations.Api.Extensions;
 using InternalOperations.Application.Mappings;
+using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,14 +12,16 @@ builder.Services.AddPersistenceServices(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 var app = builder.Build();
 
+app.MapControllers();
+app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok" }));
+
 if (app.Environment.IsDevelopment())
 {
-    // Generates the JSON spec file at /openapi/v1.json
     app.MapOpenApi();
 
     // Maps the beautiful Scalar UI at /scalar/v1
@@ -31,7 +34,5 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
-app.MapControllers();
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 app.Run();

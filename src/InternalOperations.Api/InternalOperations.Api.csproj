@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
+  
   <ItemGroup>
     <ProjectReference Include="..\InternalOperations.Application\InternalOperations.Application.csproj" />
     <ProjectReference Include="..\InternalOperations.Infrastructure\InternalOperations.Infrastructure.csproj" />
@@ -16,5 +16,6 @@
   <ItemGroup>
     <Using Include="MediatR" />
   </ItemGroup>
-
+  
+  
 </Project>

@@ -3,11 +3,9 @@ using InternalOperations.Application.DTOs;
 using InternalOperations.Application.Features.Tickets;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InternalOperations.Api.Controllers;
+namespace InternalOperations.Api.Controllers.v1;
 
-[ApiController]
-[Route("api/tickets")]
-public sealed class TicketsController : ControllerBase
+public sealed class TicketsController : BaseApiController
 {
     private readonly ISender _sender;
 
