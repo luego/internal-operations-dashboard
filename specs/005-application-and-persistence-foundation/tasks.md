@@ -1,58 +1,74 @@
 # 005 — Application and Persistence Foundation: Tasks
 
-**Estado:** Proposed  
+**Estado:** Completed
 **Fecha:** 4 de agosto de 2026
+**Completada:** 6 de agosto de 2026
 
 ## Convenciones
 
-- No se debe implementar código de negocio ni identity mientras esta spec esté en estado `Proposed`.
-- Cada tarea requiere verificación por prueba o compilación.
-- Si una tarea cambia arquitectura, seguridad o contrato, debe revisarse antes de continuar.
+- Cada tarea requiere evidencia ejecutable.
+- Los límites de arquitectura se validan con tests, no solo con documentación.
+- Los checkboxes se cierran únicamente después de format, build estricto y tests.
 
-## Gate 1 — Aprobación de la spec
+## Gate 1 — Aprobación y reconciliación
 
-- [ ] **GATE-APP-000 Aprobar requirements, design y tasks**
-  - Confirmar que el alcance corresponde exactamente a la fase 1 del baseline.
-  - Verificar que no hay identidad, policies ni feature business en el alcance.
-  - Cambiar los tres artefactos a `Approved` antes de implementar código.
+- [x] **GATE-APP-000 Aprobar requirements, design y tasks**
+  - El usuario autorizó continuar y cerrar el siguiente incremento el 6 de agosto de 2026.
+  - Se reconcilió el código adelantado con la fase 1 antes de declarar la spec completada.
 
-## Ola 1 — Cross-cutting de aplicación
+## Ola 1 — Cross-cutting de Application
 
-- [ ] **TASK-APP-001 Implementar `Result`, `Error` y tipos de error**
-  - Crear tipos con `Code`, `Message` y `Type`.
-  - Añadir factories para validation, not found, conflict, unauthorized, forbidden y failure.
-  - Verificar con pruebas unitarias.
+- [x] **TASK-APP-001 Implementar `Result`, `Error` y tipos de error**
+  - Fuente única en `InternalOperations.Application/Result.cs`.
+  - Pruebas unitarias verifican éxito, valor y fallo, incluido `Result.Error`.
 
-- [ ] **TASK-APP-002 Definir `IClock` e `ICurrentUser`**
-  - Crear interfaces pequeñas y neutralizadas sobre ASP.NET Core.
-  - Preparar el punto de inyección para fases posteriores.
+- [x] **TASK-APP-002 Definir `IClock` e `ICurrentUser`**
+  - Contratos pequeños en Application sin dependencia de ASP.NET Core.
 
-- [ ] **TASK-APP-003 Configurar MediatR mínimo**
-  - Añadir la dependencia a Application.
-  - Preparar el pipeline base se usa en handlers sin acoplarse a API.
+- [x] **TASK-APP-003 Configurar MediatR mínimo**
+  - MediatR, command handler y validation behavior registrados en Application/API.
 
-## Ola 2 — Persistencia base
+## Ola 2 — Persistence base
 
-- [ ] **TASK-PER-001 Crear `ApplicationDbContext`**
-  - Configurar `DbContext` mínimo con extensibilidad para futuras entidades.
-  - Mantener la dependencia de EF Core solo en Persistence.
+- [x] **TASK-PER-001 Crear `ApplicationDbContext`**
+  - DbContext central con entidades de dominio y configuración EF Core.
 
-- [ ] **TASK-PER-002 Implementar repositorio genérico y Unit of Work**
-  - Crear `IRepository<T>`, `GenericRepository<T>`, `IUnitOfWork` y `UnitOfWork`.
-  - Verificar que el `UnitOfWork` confirma cambios en memoria.
+- [x] **TASK-PER-002 Implementar repositorio genérico y Unit of Work**
+  - Puertos `IRepository<T>` e `IUnitOfWork` ubicados en Application.
+  - `GenericRepository<T>` y `UnitOfWork` implementados en Persistence.
+  - Integration tests verifican operaciones y confirmación de cambios en memoria.
 
-- [ ] **TASK-PER-003 Preparar provider dual**
-  - Asegurar que la capa de persistencia puede resolver PostgreSQL/SQL Server por configuración.
-  - Mantener la same API para application.
+- [x] **TASK-PER-003 Preparar provider dual**
+  - `Database:Provider` selecciona PostgreSQL o SQL Server en el composition root.
 
-## Ola 3 — Validación
+## Ola 3 — Reconciliación arquitectónica
 
-- [ ] **TASK-VAL-001 Ejecutar pruebas de aplicación y persistencia**
-  - Verificar que `dotnet test` para los proyectos de fase 1 pasa.
-  - Revisar que no haya regresiones de arquitectura.
+- [x] **TASK-ARC-001 Corregir dirección de dependencias**
+  - Eliminada la referencia Application → Persistence.
+  - Añadida la referencia Persistence → Application.
+  - Architecture tests: 8 aprobados.
 
-## Salida esperada
+- [x] **TASK-ARC-002 Eliminar duplicados y placeholders**
+  - Result duplicado y Pagination sin consumo retirados de Shared.
+  - Repositorios específicos y métodos sin implementación retirados del contrato actual.
 
-- `Application` tiene la base transversal para futuras features.
-- `Persistence` ofrece la base mínima para repositorios y Unit of Work.
-- La próxima spec de Identity queda bloqueada hasta cerrar esta fase.
+- [x] **TASK-API-001 Conservar operación vertical mínima**
+  - La creación de tickets valida API → MediatR → Application → Persistence.
+  - El resto del ciclo funcional queda para specs posteriores.
+
+## Ola 4 — Validación y evidencia
+
+- [x] **TASK-VAL-001 Ejecutar checks equivalentes a CI**
+  - `dotnet tool restore`: correcto.
+  - `dotnet restore InternalOperations.slnx --locked-mode`: correcto.
+  - `dotnet format InternalOperations.slnx --verify-no-changes --no-restore`: correcto.
+  - `dotnet build InternalOperations.slnx --configuration Release --no-restore -p:ContinuousIntegrationBuild=true`: 0 warnings, 0 errores.
+  - `dotnet test InternalOperations.slnx --configuration Release --no-build --no-restore`: 17 aprobados, 0 fallidos.
+
+## Salida alcanzada
+
+- Application contiene los contratos y componentes transversales de fase 1.
+- Persistence implementa los puertos sin invertir dependencias.
+- La composición vertical mínima está operativa.
+- El repositorio supera los checks locales equivalentes a Backend CI.
+- La siguiente feature debe comenzar con una spec nueva en estado `Proposed`.

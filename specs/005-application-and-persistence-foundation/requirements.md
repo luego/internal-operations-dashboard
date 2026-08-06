@@ -1,32 +1,35 @@
 # 005 — Application and Persistence Foundation: Requirements
 
-**Estado:** Proposed  
-**Fecha:** 4 de agosto de 2026  
-**Basado en:** Fase 1 del documento maestro: Cross-cutting y persistencia  
-**Límite:** Esta spec no incluye identidad, autenticación ni feature business.
+**Estado:** Completed
+**Fecha:** 4 de agosto de 2026
+**Completada:** 6 de agosto de 2026
+**Basado en:** Fase 1 del documento maestro: Cross-cutting y persistencia
+**Límite:** Esta spec no incluye identidad, autenticación ni CRUD funcional; conserva una creación mínima de ticket para validar la composición vertical.
 
 ## 1. Objetivo
 
-Establecer la base transversal de la aplicación y la capa de persistencia para permitir casos de uso cohesivos, resultados tipados y acceso a datos portable entre proveedores.
+Establecer la base transversal de Application y Persistence para permitir casos de uso cohesivos, resultados tipados y acceso a datos portable entre proveedores, respetando los límites de Clean Architecture.
 
 ## 2. Alcance
 
 Incluye:
 
 - Result pattern y catálogo de errores para errores esperados;
-- MediatR y pipeline behavior mínimo para casos de uso;
+- MediatR y pipeline behavior mínimo;
 - validación y configuración básica de mapping;
 - abstracciones de reloj y usuario actual;
-- DbContext, repositorio genérico y Unit of Work;
+- puertos de persistencia propiedad de Application;
+- DbContext, repositorio genérico y Unit of Work implementados por Persistence;
 - selección de proveedor PostgreSQL/SQL Server por configuración;
-- pruebas de contrato para la capa de aplicación y persistencia.
+- pruebas unitarias, arquitectónicas y de integración;
+- una operación mínima de creación de ticket para comprobar la composición API → Application → Persistence.
 
 No incluye:
 
-- autenticación/authorization identity;
-- endpoints o controllers de negocio;
-- CRUD de departamentos, usuarios o tickets;
-- migraciones de dominio funcional;
+- autenticación, autorización o Identity;
+- CRUD completo de departamentos, usuarios o tickets;
+- asignación, cierre, búsqueda o eliminación de tickets;
+- migraciones funcionales de dominio;
 - frontend.
 
 ## 3. Requisitos funcionales
@@ -34,63 +37,70 @@ No incluye:
 ### REQ-APP-001 Result y errores tipados
 
 - El sistema debe devolver `Result` y `Result<T>` con errores tipados y códigos estables.
-- Debe existir un catálogo de errores para validation, not found, conflict, unauthorized, forbidden y failure.
-- Los errores esperados deben seguir una estructura consistente incluso cuando un caso de uso falla antes de llegar a la API.
+- Debe existir un catálogo para validation, not found, conflict, unauthorized, forbidden y failure.
+- Application debe ser la única fuente de verdad de `Result`, `Error` y `ErrorType`.
+- Un resultado fallido debe exponer la colección de errores y su primer error mediante `Error`.
 
 ### REQ-APP-002 Pipeline de aplicación
 
-- La aplicación debe permitir la entrada de comandos y consultas a través de MediatR.
-- Debe existir un pipeline base para validación y comportamiento transversal mínimo.
-- Los handlers deben coordinar casos de uso sin duplicar lógica de persistencia.
+- Application debe recibir comandos y consultas mediante MediatR.
+- Debe existir un pipeline base para validación.
+- Los handlers deben coordinar casos de uso sin duplicar acceso a datos.
 
 ### REQ-APP-003 Validación y mapping básicos
 
-- Debe existir un patrón para validar entidades o comandos de entrada.
-- Debe existir una capa simple de mapeo para DTOs, entidades o resultados de aplicación.
-- La validación debe permanecer fuera de API y persistencia.
+- La validación debe permanecer fuera de API y Persistence.
+- Debe existir mapping explícito entre DTOs, entidades y resultados.
 
-### REQ-APP-004 Cross-cutting de contexto
+### REQ-APP-004 Contexto transversal
 
-- Debe existir un mecanismo mínimo para obtener la hora actual y el usuario actual del contexto de ejecución.
-- El código de aplicación debe poder consumir esas dependencias sin depender de ASP.NET Core directamente.
+- `IClock` e `ICurrentUser` deben pertenecer a Application.
+- Application no debe depender de ASP.NET Core para consumirlas.
 
 ### REQ-PER-001 Persistencia base
 
-- Debe existir un `ApplicationDbContext` central para la infraestructura de persistencia.
-- Debe existir un repositorio genérico mínimo para operaciones CRUD comunes.
-- Debe existir un `UnitOfWork` que encapsule la confirmación del cambio.
+- Debe existir un `ApplicationDbContext` central.
+- `IRepository<T>` e `IUnitOfWork` deben pertenecer a Application.
+- `GenericRepository<T>` y `UnitOfWork` deben implementarse en Persistence.
+- `UnitOfWork` debe encapsular la confirmación de cambios.
 
 ### REQ-PER-002 Proveedor dual
 
-- La solución debe permitir seleccionar PostgreSQL o SQL Server por configuración sin cambiar casos de uso de aplicación.
-- La capa de persistencia debe encapsular el proveedor y mantener la misma interfaz de repositorio.
+- La API debe seleccionar PostgreSQL o SQL Server por configuración.
+- El proveedor no debe alterar los contratos ni casos de uso de Application.
 
-### REQ-PER-003 Contratos de persistencia
+### REQ-PER-003 Contratos y pruebas
 
-- Las pruebas del proyecto de persistencia deben verificar la operación real del `DbContext` y del `UnitOfWork`.
-- La persistencia debe operar con una estrategia neutral al proveedor en la capa de aplicación.
+- Las pruebas de Persistence deben verificar operaciones reales del `DbContext` y `UnitOfWork`.
+- Las abstracciones públicas deben tener consumo real y no quedar como placeholders.
+
+### REQ-API-001 Operación vertical mínima
+
+- `POST /api/v1/tickets` debe atravesar API, MediatR, Application y Persistence.
+- Esta operación valida la composición de fase 1 y no habilita CRUD completo.
 
 ## 4. Requisitos no funcionales
 
 ### REQ-APP-NF-001 Dependencias
 
-La capa de aplicación no debe depender de Api, Infrastructure ni Persistence.
+Application no debe depender de Api, Infrastructure ni Persistence. Persistence debe depender de Application para implementar sus puertos.
 
 ### REQ-PER-NF-001 Portabilidad
 
-El diseño de persistencia debe admitir PostgreSQL y SQL Server con la misma API de repositorios.
+Persistence debe admitir PostgreSQL y SQL Server mediante la misma API de repositorios.
 
 ### REQ-APP-NF-002 Testabilidad
 
-Los nuevos componentes deben poder probarse en unit tests e integration tests sin infraestructura externa completa.
+Los componentes deben probarse sin infraestructura externa completa mediante unit tests, architecture tests e integración en memoria.
 
 ### REQ-APP-NF-003 Mantenibilidad
 
-Las abstracciones creadas deben tener un consumo real en la solución y no quedar como placeholders sin uso.
+No deben existir Result patterns duplicados, contratos públicos sin consumo ni métodos públicos que lancen `NotImplementedException`.
 
-## 5. Supuestos y decisiones no bloqueantes
+## 5. Criterios de aceptación
 
-- La capa funcional de Identity queda posterior a esta spec.
-- El Result pattern se implementa sin forzar todavía un controlador completo.
-- La persistencia usa EF Core con una base de datos en memoria para verificación mínima local.
-- El objetivo es dejar la base de contratos y composición transversal para las siguientes feature specs.
+- restore locked, format, build CI y tests pasan;
+- el build estricto termina con 0 warnings y 0 errores;
+- las pruebas arquitectónicas confirman la dirección de dependencias;
+- los puertos de persistencia son propiedad de Application;
+- la documentación describe la fase y estructura reales.

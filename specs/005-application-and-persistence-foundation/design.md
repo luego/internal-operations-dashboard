@@ -1,79 +1,91 @@
 # 005 — Application and Persistence Foundation: Design
 
-**Estado:** Proposed  
-**Requisitos:** `requirements.md`  
+**Estado:** Completed
+**Requisitos:** `requirements.md`
 **Fecha:** 4 de agosto de 2026
+**Completada:** 6 de agosto de 2026
 
 ## 1. Resumen
 
-Esta spec crea la base transversal del backend antes de la identidad. La solución introduce resultados tipados, pipeline mínimo de MediatR, abstracciones de tiempo y usuario actual, además de la persistencia base con DbContext, repositorio genérico y Unit of Work.
+La fase 1 establece resultados tipados, MediatR, validación, mapping y puertos de persistencia en Application. Persistence implementa esos puertos con EF Core, proveedor configurable y una unidad de trabajo mínima. Una creación de ticket valida la composición completa sin ampliar el alcance a CRUD.
 
-## 2. Contexto
+## 2. Dirección de dependencias
 
-La fase 0 ya dejó resueltos los límites de proyecto y la configuración del repositorio. Ahora se necesita una capa ejecutable que permita construir casos de uso y acceso a datos sin introducir la identidad ni feature business.
+```text
+Api -> Application -> Domain
+ |         \-> Shared
+ |-> Infrastructure -> Application + Shared
+ \-> Persistence -> Application + Domain + Shared
+```
+
+Reglas:
+
+- Domain no depende de frameworks ni capas externas.
+- Application no referencia Api, Infrastructure ni Persistence.
+- Application es propietaria de los puertos que necesita.
+- Persistence conoce Application únicamente para implementar esos puertos.
+- Api actúa como composition root.
+
+Las pruebas de arquitectura verifican tanto referencias de proyectos como dependencias de ensamblados.
 
 ## 3. Decisiones de diseño
 
 ### DES-APP-001 Result pattern
 
-Se implementará un `Result` base con `Result<T>` para casos exitosos y fallidos. Los errores tendrán un `ErrorType` y una estructura con `Code`, `Message` y `Type`.
+`src/InternalOperations.Application/Result.cs` es la única fuente de verdad para `Result`, `Result<T>`, `Error` y `ErrorType`. Un fallo conserva todos sus errores y expone el primero en `Error` para el mapeo HTTP.
 
-Esto permite que los handlers y servicios regresen errores esperados de forma consistente antes de mapearse a HTTP.
+### DES-APP-002 MediatR y validación
 
-### DES-APP-002 MediatR y pipeline mínimo
-
-MediatR se añadirá a la capa `Application` como dependencia principal. La implementación mínima incluye:
-
-- `IRequest<TResponse>` / `IRequest` para comandos y consultas;
-- un behavior base para validación preliminar;
-- una separación clara entre handler y service.
-
-La capa `Application` sigue sin depender de `Api`, `Infrastructure` ni `Persistence`.
+Los comandos implementan `IRequest<TResponse>`. Los handlers coordinan el servicio de aplicación y `ValidationBehavior` ejecuta validadores antes del handler. La API no contiene reglas de aplicación.
 
 ### DES-APP-003 Contexto transversal
 
-Se introducirán interfaces pequeñas para:
+`IClock` e `ICurrentUser` son interfaces pequeñas de Application, sin dependencias de ASP.NET Core.
 
-- `IClock` para obtener la hora actual;
-- `ICurrentUser` para obtener el actor activo.
+### DES-PER-001 Puertos y adaptadores
 
-Estas interfaces serán manejadas por la composición root en una fase posterior, pero ya se dejarán en la capa correcta para preparar la base del siguiente alcance.
+Puertos en Application:
 
-### DES-PER-001 DbContext y repositorio
+- `Abstractions/Persistence/IRepository.cs`;
+- `Abstractions/Persistence/IUnitOfWork.cs`.
 
-La capa de persistencia incluirá:
+Adaptadores en Persistence:
 
-- `ApplicationDbContext` como punto de entrada a EF Core;
-- `IRepository<T>` y `GenericRepository<T>`;
-- `IUnitOfWork` y `UnitOfWork`.
+- `ApplicationDbContext`;
+- `GenericRepository<T>`;
+- `UnitOfWork`.
 
-La implementación será mínima, portable y preparada para que cada caso de uso comparta la misma abstracción sin acoplarse a EF Core.
+`IUnitOfWork` solo confirma cambios. Los repositorios se inyectan directamente en los servicios que los consumen, evitando contratos específicos sin comportamiento real.
 
-### DES-PER-002 Provider strategy
+### DES-PER-002 Estrategia de proveedor
 
-La infraestructura de persistencia seleccionará PostgreSQL o SQL Server por configuración, sin cambiar los contratos de aplicación. El patrón se deja preparado para que el provider se resuelva en el composition root de la API.
+La composición lee `Database:Provider` y configura `UseNpgsql` o `UseSqlServer`. El proveedor y connection string permanecen fuera de Application.
 
-### DES-PER-003 Testability
+### DES-PER-003 Testabilidad
 
-La misión de estas pruebas será validar que:
+- Application unit tests verifican Result y pipeline.
+- Architecture tests verifican límites de capas.
+- Persistence integration tests usan EF Core InMemory para comprobar repositorio y Unit of Work.
+- API integration tests validan el arranque y la composición HTTP.
 
-- `Result` y `Error` responden correctamente a casos ok/failure;
-- el `DbContext` salva cambios con un `UnitOfWork` real;
-- la integración de la persistencia base funciona en memoria sin infraestructura adicional.
-
-## 4. Límite de capas
+## 4. Operación vertical mínima
 
 ```text
-Api -> Application -> Domain
-          \-> Shared
-Persistence -> Application + Domain + Shared
-Infrastructure -> Application + Shared
+POST /api/v1/tickets
+  -> TicketsController
+  -> CreateTicketCommand
+  -> CreateTicketCommandHandler
+  -> ITicketService / TicketService
+  -> IRepository<Ticket> + IUnitOfWork
+  -> GenericRepository<Ticket> + ApplicationDbContext
 ```
 
-La nueva spec no introduce dependencias hacia `Api` desde `Application`, ni `Application` hacia `Persistence` a nivel de implementación directa. La infraestructura puede resolver el provider y el repositorio real desde la composición.
+Solo `CreateAsync` forma parte de esta fase. Consultar, asignar, cerrar y eliminar tickets requieren specs funcionales posteriores.
 
 ## 5. Riesgos y mitigaciones
 
-- **Sobreabstracción:** solo se introduce lo necesario para la base transversal.
-- **Acoplamiento accidental:** las interfaces de contexto se mantienen mínimas y neutralizadas frente a ASP.NET Core.
-- **Provider-specific drift:** se deja el punto de extensión por configuración, no por tipos concretos en Application.
+- **Acoplamiento accidental:** tests arquitectónicos protegen las referencias exactas.
+- **Sobreabstracción:** se eliminaron contratos específicos y placeholders sin consumo.
+- **Duplicación transversal:** Result tiene un único propietario.
+- **Drift por proveedor:** Application solo consume puertos neutrales.
+- **Drift documental:** requirements, design, tasks y README se sincronizan al cerrar la fase.

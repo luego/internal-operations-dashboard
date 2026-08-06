@@ -2,14 +2,14 @@
 
 Backend-first internal operations system for tickets, departments, users, comments, history and operational metrics. The backend baseline targets .NET 10 and follows pragmatic Clean Architecture with Ports and Adapters.
 
-The repository is currently at **phase 0: solution foundation**. It contains the project boundaries, toolchain, architecture guardrails and CI foundation. It does not yet expose business endpoints or require a database.
+The repository has completed **phase 1: application and persistence foundation**. It contains the project boundaries, cross-cutting application primitives, EF Core persistence adapters, dual-provider composition and a minimal ticket-creation endpoint that validates the vertical architecture.
 
 ## Prerequisites
 
 - .NET SDK compatible with `global.json` (`10.0.3xx`; latest patch)
 - Git
 
-Docker, PostgreSQL and SQL Server are **not required for phase 0**. They will be introduced by the persistence spec.
+Docker, PostgreSQL and SQL Server are not required to build or run the automated tests. Running the API against a real database requires either PostgreSQL or SQL Server and the corresponding `Database` configuration.
 
 ## Validate the foundation
 
@@ -61,6 +61,9 @@ Shared <- stable technical primitives only
 - [Foundation requirements](specs/000-solution-foundation/requirements.md)
 - [Foundation design](specs/000-solution-foundation/design.md)
 - [Foundation tasks](specs/000-solution-foundation/tasks.md)
+- [Application and persistence requirements](specs/005-application-and-persistence-foundation/requirements.md)
+- [Application and persistence design](specs/005-application-and-persistence-foundation/design.md)
+- [Application and persistence tasks and evidence](specs/005-application-and-persistence-foundation/tasks.md)
 - [Architecture decision records](docs/adr/)
 
 Changes are developed from an approved feature spec. Requirements, design, tasks, tests and evidence must remain synchronized. Frontend work is outside the current backend scope.
