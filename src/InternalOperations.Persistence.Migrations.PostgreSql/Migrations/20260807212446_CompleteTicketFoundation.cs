@@ -139,6 +139,15 @@ public partial class CompleteTicketFoundation : Migration
             name: "Version",
             table: "Tickets");
 
+        migrationBuilder.AlterColumn<int>(
+            name: "Number",
+            table: "Tickets",
+            type: "integer",
+            nullable: false,
+            oldClrType: typeof(int),
+            oldType: "integer",
+            oldDefaultValueSql: "nextval('\"TicketNumbers\"')");
+
         migrationBuilder.DropSequence(
             name: "TicketNumbers");
 
@@ -150,15 +159,6 @@ public partial class CompleteTicketFoundation : Migration
             oldClrType: typeof(string),
             oldType: "character varying(200)",
             oldMaxLength: 200);
-
-        migrationBuilder.AlterColumn<int>(
-            name: "Number",
-            table: "Tickets",
-            type: "integer",
-            nullable: false,
-            oldClrType: typeof(int),
-            oldType: "integer",
-            oldDefaultValueSql: "nextval('\"TicketNumbers\"')");
 
         migrationBuilder.AlterColumn<string>(
             name: "Description",
