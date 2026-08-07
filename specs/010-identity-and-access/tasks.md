@@ -1,6 +1,6 @@
 # 010 — Identity and Access: Tasks
 
-**Estado:** Approved
+**Estado:** Implementing
 **Fecha:** 6 de agosto de 2026
 **Aprobada:** 6 de agosto de 2026
 **Requisitos:** `requirements.md`
@@ -24,7 +24,7 @@
 
 ## Ola 1 — Modelo y contratos
 
-- [ ] **TASK-SEC-001 Agregar dependencias y opciones de autenticación**
+- [x] **TASK-SEC-001 Agregar dependencias y opciones de autenticación**
   - Requisitos: REQ-AUTH-002, REQ-AUTH-NF-001.
   - Agregar versiones centrales y referencias mínimas para Identity EF, JWT bearer y testing requerido.
   - Crear opciones tipadas para JWT, refresh, lockout y seed con validación de arranque.
@@ -32,7 +32,7 @@
   - Pruebas: configuración válida/inválida y ambientes Testing/Development/Production.
   - Verificación: restore locked, build estricto de proyectos afectados.
 
-- [ ] **TASK-SEC-002 Implementar cuenta Identity y refresh-session persistence model**
+- [x] **TASK-SEC-002 Implementar cuenta Identity y refresh-session persistence model**
   - Requisitos: REQ-AUTH-003, REQ-AUTH-NF-002.
   - Integrar Identity con GUID en `ApplicationDbContext` sin exponer sus tipos a Domain/Application.
   - Agregar `RefreshTokenSession`, configuraciones, índices, concurrency token y relaciones restrictivas.
@@ -40,7 +40,7 @@
   - Pruebas: model metadata, restricciones e invariantes de sesión.
   - Verificación: Persistence integration tests estrechos.
 
-- [ ] **TASK-SEC-003 Definir e implementar puertos de autenticación de cuentas**
+- [x] **TASK-SEC-003 Definir e implementar puertos de autenticación de cuentas**
   - Requisitos: REQ-AUTH-001, REQ-AUTH-005, REQ-AUTH-NF-001.
   - Crear modelos/puertos neutrales en Application.
   - Implementar adapter con Identity para lookup normalizado, password verification, estado activo, roles y lockout.
@@ -48,7 +48,7 @@
   - Pruebas: éxito, cada causa de fallo, contador y reset de lockout.
   - Verificación: Application unit + Persistence integration tests afectados.
 
-- [ ] **TASK-SEC-004 Implementar emisión de access tokens**
+- [x] **TASK-SEC-004 Implementar emisión de access tokens**
   - Requisitos: REQ-AUTH-002.
   - Implementar `IAccessTokenIssuer` en Infrastructure con reloj inyectado, algoritmo fijado y claims mínimos.
   - Validar issuer, audience, key entropy, lifetime y clock skew al iniciar.
@@ -74,7 +74,7 @@
   - Pruebas: validación, éxito, generic failures, lockout, inactive y rollback si falla persistencia.
   - Verificación: Application unit + Persistence integration tests.
 
-- [ ] **TASK-SEC-007 Integrar policies e `ICurrentUser`**
+- [x] **TASK-SEC-007 Integrar policies e `ICurrentUser`**
   - Requisitos: REQ-AUTH-006, REQ-AUTH-007.
   - Crear constantes únicas para roles/policies y registrar matriz aprobada.
   - Configurar fallback policy de autenticación y excepciones anónimas explícitas.
@@ -93,7 +93,7 @@
   - Pruebas: contratos `200/204/400/401/403`, security metadata y ausencia de secretos.
   - Verificación: API integration tests y generación OpenAPI.
 
-- [ ] **TASK-SEC-009 Implementar seed seguro de Development**
+- [x] **TASK-SEC-009 Implementar seed seguro de Development**
   - Requisitos: REQ-AUTH-008.
   - Crear initializer idempotente de roles, cuenta Administrator y perfil Domain con GUID compartido.
   - Requerir enable flag y secretos externos; bloquear seed fuera de Development.
@@ -126,7 +126,7 @@
 
 ## Ola 5 — Cierre y evidencia
 
-- [ ] **TASK-SEC-013 Ejecutar seguridad y calidad estática**
+- [x] **TASK-SEC-013 Ejecutar seguridad y calidad estática**
   - Buscar secretos y usos inseguros: plaintext refresh tokens, logging de request bodies, `AllowAnyOrigin` con credentials, algoritmos aceptados dinámicamente y claims sensibles.
   - Ejecutar auditoría de paquetes con las herramientas del repositorio y clasificar cualquier advisory.
   - Verificar que Domain/Application no contienen referencias de Identity/JWT/ASP.NET auth.
@@ -156,6 +156,21 @@
 - REQ-AUTH-007 → DES-AUTH-006 → TASK-SEC-007 → TEST-AUTH-041..043.
 - REQ-AUTH-008 → DES-AUTH-008 → TASK-SEC-009 → TEST-AUTH-044..048.
 - REQ-AUTH-009 → DES-AUTH-009 → TASK-SEC-010 → TEST-AUTH-049..054.
+
+## Evidencia del checkpoint de implementación
+
+- Restore locked: `dotnet restore InternalOperations.slnx --locked-mode` completó correctamente.
+- Formato: `dotnet format InternalOperations.slnx --verify-no-changes --no-restore` completó correctamente.
+- Build Release CI: compiló con `0` errores. Este host ARM reporta `NETSDK1188` para recursos localizados de paquetes de terceros; no se atribuyen al código, pero `TASK-SEC-014` permanece abierta porque el criterio exige `0` warnings.
+- Suite local: `54/54` pruebas aprobadas, `0` fallos y `0` omitidas:
+  - API Integration: `22`.
+  - Application Unit: `16`.
+  - Architecture: `8`.
+  - Domain Unit: `1`.
+  - Persistence Integration: `7`.
+- Auditoría NuGet: ningún paquete vulnerable detectado mediante `dotnet list InternalOperations.slnx package --vulnerable --include-transitive`.
+- Revisión de seguridad: sin secretos de autenticación versionados, sin refresh tokens persistidos en plaintext, algoritmo JWT fijado, límites aprobados validados y fronteras Domain/Application protegidas por los `8` architecture tests.
+- Pendiente reproducible: no hay migraciones EF separadas ni ejecución real sobre PostgreSQL/SQL Server. Docker CLI está presente, pero el daemon no está disponible en este host; por eso las tareas que requieren contrato real de providers y el estado global siguen abiertos.
 
 ## Salida esperada
 

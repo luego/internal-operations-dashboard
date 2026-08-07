@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>internal-operations-dashboard-api-development</UserSecretsId>
+  </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\InternalOperations.Application\InternalOperations.Application.csproj" />
@@ -9,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>

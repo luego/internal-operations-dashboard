@@ -1,6 +1,8 @@
 using InternalOperations.Api.ErrorHandling;
+using InternalOperations.Application.Common.Authorization;
 using InternalOperations.Application.DTOs;
 using InternalOperations.Application.Features.Tickets;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternalOperations.Api.Controllers.v1;
@@ -15,6 +17,7 @@ public sealed class TicketsController : BaseApiController
     }
 
     [HttpPost]
+    [Authorize(Policy = AuthorizationPolicies.TicketsCreate)]
     public async Task<IActionResult> Create(
         CreateTicketDto request,
         CancellationToken cancellationToken)

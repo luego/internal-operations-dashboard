@@ -14,31 +14,17 @@ public static class ResultExtensions
             return new OkObjectResult(result.Value);
         }
 
-        return result.Error?.Type switch
+        var status = result.Error?.Type switch
         {
-            ErrorType.Validation =>
-                new BadRequestObjectResult(result.Error),
-
-            ErrorType.NotFound =>
-                new NotFoundObjectResult(result.Error),
-
-            ErrorType.Conflict =>
-                new ConflictObjectResult(result.Error),
-
-            ErrorType.Unauthorized =>
-                new UnauthorizedObjectResult(result.Error),
-
-            ErrorType.Forbidden =>
-                new ObjectResult(result.Error)
-                {
-                    StatusCode = StatusCodes.Status403Forbidden
-                },
-
-            _ => new ObjectResult(result.Error)
-            {
-                StatusCode =
-                    StatusCodes.Status500InternalServerError
-            }
+            ErrorType.Validation => StatusCodes.Status400BadRequest,
+            ErrorType.NotFound => StatusCodes.Status404NotFound,
+            ErrorType.Conflict => StatusCodes.Status409Conflict,
+            ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+            ErrorType.Forbidden => StatusCodes.Status403Forbidden,
+            _ => StatusCodes.Status500InternalServerError,
         };
+        var problem = new ProblemDetails { Status = status, Title = result.Error?.Message };
+        problem.Extensions["code"] = result.Error?.Code;
+        return new ObjectResult(problem) { StatusCode = status };
     }
 }

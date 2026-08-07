@@ -4,7 +4,7 @@ Backend-first internal operations system for tickets, departments, users, commen
 
 The repository has completed **phase 1: application and persistence foundation**. It contains the project boundaries, cross-cutting application primitives, EF Core persistence adapters, dual-provider composition and a minimal ticket-creation endpoint that validates the vertical architecture.
 
-The next increment, **phase 2: identity and access**, has an approved spec and is ready for implementation.
+**Phase 2: identity and access** is now implementing. The current checkpoint includes ASP.NET Core Identity, JWT access tokens, rotating refresh sessions with replay-family revocation, role policies, secure Development seeding, authentication rate limits and OpenAPI bearer metadata. Provider-specific migrations and the real PostgreSQL/SQL Server contract matrix remain open before the phase can be marked completed.
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ The next increment, **phase 2: identity and access**, has an approved spec and i
 
 Docker, PostgreSQL and SQL Server are not required to build or run the automated tests. Running the API against a real database requires either PostgreSQL or SQL Server and the corresponding `Database` configuration.
 
-## Validate the foundation
+## Validate the backend
 
 Run these commands from the repository root:
 
@@ -26,6 +26,22 @@ dotnet test InternalOperations.slnx --configuration Release --no-build --no-rest
 ```
 
 The build treats warnings as errors under the CI flag. The architecture suite verifies both assembly dependencies and exact project-reference boundaries.
+
+## Development authentication seed
+
+The administrator seed is opt-in and runs only in `Development`. Keep JWT and seed credentials out of `appsettings*.json`; configure local placeholder values with user secrets:
+
+```bash
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Jwt:Issuer" "https://issuer.example.test"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Jwt:Audience" "internal-operations-api"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Jwt:SigningKey" "<at-least-32-byte-development-signing-key>"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Seed:Enabled" "true"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Seed:AdministratorIdentifier" "<development-admin-identifier>"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Seed:AdministratorPassword" "<development-admin-password>"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Seed:AdministratorDisplayName" "Development Administrator"
+```
+
+Leave `Authentication:Seed:Enabled` unset or `false` when the seed is not required. Never use real account data or production credentials in these examples.
 
 ## Solution structure
 
@@ -66,9 +82,9 @@ Shared <- stable technical primitives only
 - [Application and persistence requirements](specs/005-application-and-persistence-foundation/requirements.md)
 - [Application and persistence design](specs/005-application-and-persistence-foundation/design.md)
 - [Application and persistence tasks and evidence](specs/005-application-and-persistence-foundation/tasks.md)
-- [Approved identity and access requirements](specs/010-identity-and-access/requirements.md)
-- [Approved identity and access design](specs/010-identity-and-access/design.md)
-- [Approved identity and access tasks](specs/010-identity-and-access/tasks.md)
+- [Identity and access requirements — Implementing](specs/010-identity-and-access/requirements.md)
+- [Identity and access design — Implementing](specs/010-identity-and-access/design.md)
+- [Identity and access tasks and evidence — Implementing](specs/010-identity-and-access/tasks.md)
 - [Architecture decision records](docs/adr/)
 
 Changes are developed from an approved feature spec. Requirements, design, tasks, tests and evidence must remain synchronized. Frontend work is outside the current backend scope.
