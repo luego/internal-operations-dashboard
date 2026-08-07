@@ -20,3 +20,35 @@ public sealed class GetTicketQueryHandler(ITicketAdministrationService tickets)
             : Result<TicketDto>.Success(ticket);
     }
 }
+
+public sealed class ListTicketsQueryHandler(ITicketAdministrationService tickets)
+    : IRequestHandler<ListTicketsQuery, Result<TicketPage>>
+{
+    public async Task<Result<TicketPage>> Handle(ListTicketsQuery request, CancellationToken cancellationToken) =>
+        Result<TicketPage>.Success(await tickets.ListAsync(
+            new TicketListFilter(
+                request.Page,
+                request.PageSize,
+                string.IsNullOrWhiteSpace(request.Search) ? null : request.Search.Trim(),
+                request.Status,
+                request.Priority,
+                request.DepartmentId,
+                request.UserId,
+                request.SortBy,
+                request.SortDirection),
+            cancellationToken));
+}
+
+public sealed class UpdateTicketCommandHandler(ITicketAdministrationService tickets)
+    : IRequestHandler<UpdateTicketCommand, Result<TicketDto>>
+{
+    public Task<Result<TicketDto>> Handle(UpdateTicketCommand request, CancellationToken cancellationToken) =>
+        tickets.UpdateAsync(request, cancellationToken);
+}
+
+public sealed class ChangeTicketStatusCommandHandler(ITicketAdministrationService tickets)
+    : IRequestHandler<ChangeTicketStatusCommand, Result<TicketDto>>
+{
+    public Task<Result<TicketDto>> Handle(ChangeTicketStatusCommand request, CancellationToken cancellationToken) =>
+        tickets.ChangeStatusAsync(request, cancellationToken);
+}

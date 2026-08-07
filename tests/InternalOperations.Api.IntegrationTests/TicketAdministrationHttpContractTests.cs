@@ -8,16 +8,23 @@ namespace InternalOperations.Api.IntegrationTests;
 public sealed class TicketAdministrationHttpContractTests
 {
     [Fact]
-    public void TicketsControllerPublishesCreateAndGetWithoutClientControlledNumber()
+    public void TicketsControllerPublishesFiveAuthorizedOperationsWithoutClientControlledNumber()
     {
         var type = typeof(TicketsController);
         var methods = type.GetMethods().Where(method => method.DeclaringType == type).ToArray();
 
-        Assert.Equal(2, methods.Length);
-        var create = methods.Single(method => method.Name == "Create");
-        var authorize = Assert.Single(create.GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>());
-        Assert.Equal(AuthorizationPolicies.TicketsCreate, authorize.Policy);
-        Assert.NotNull(methods.Single(method => method.Name == "Get").GetCustomAttributes(typeof(HttpGetAttribute), true).SingleOrDefault());
+        Assert.Equal(5, methods.Length);
+        AssertPolicy(methods.Single(method => method.Name == "Create"), AuthorizationPolicies.TicketsCreate);
+        AssertPolicy(methods.Single(method => method.Name == "Get"), AuthorizationPolicies.TicketsRead);
+        AssertPolicy(methods.Single(method => method.Name == "List"), AuthorizationPolicies.TicketsRead);
+        AssertPolicy(methods.Single(method => method.Name == "Update"), AuthorizationPolicies.TicketsAssign);
+        AssertPolicy(methods.Single(method => method.Name == "ChangeStatus"), AuthorizationPolicies.TicketsChangeStatus);
         Assert.DoesNotContain(typeof(CreateTicketRequest).GetProperties(), property => property.Name == "Number");
+    }
+
+    private static void AssertPolicy(System.Reflection.MethodInfo method, string expectedPolicy)
+    {
+        var authorize = Assert.Single(method.GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>());
+        Assert.Equal(expectedPolicy, authorize.Policy);
     }
 }

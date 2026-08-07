@@ -250,6 +250,66 @@ public sealed class RelationalProviderContractTests
         Assert.True(first.Value!.Number > 0);
         Assert.True(second.Value!.Number > first.Value.Number);
         Assert.Equal(first.Value.Id, (await service.GetAsync(first.Value.Id, default))!.Id);
+
+        var page = await service.ListAsync(
+            new TicketListFilter(1, 25, "Provider", TicketStatus.Open, null, department.Id, null),
+            default);
+        Assert.Equal(2, page.TotalCount);
+
+        var updated = await service.UpdateAsync(
+            new UpdateTicketCommand(
+                first.Value.Id,
+                "Provider ticket updated",
+                first.Value.Description,
+                TicketPriority.Low,
+                department.Id,
+                null,
+                first.Value.Version),
+            default);
+        Assert.True(updated.IsSuccess);
+        var transitioned = await service.ChangeStatusAsync(
+            new ChangeTicketStatusCommand(updated.Value!.Id, TicketStatus.InProgress, updated.Value.Version),
+            default);
+        Assert.True(transitioned.IsSuccess);
+
+        context.ChangeTracker.Clear();
+        await using var firstWriterContext = createContext();
+        await using var staleWriterContext = createContext();
+        var staleTicket = await staleWriterContext.Tickets.SingleAsync(ticket => ticket.Id == transitioned.Value!.Id);
+        var firstWriter = new TicketAdministrationService(firstWriterContext, new FixedClock(now.AddMinutes(1)));
+        var staleWriter = new TicketAdministrationService(staleWriterContext, new FixedClock(now.AddMinutes(2)));
+        var winner = await firstWriter.UpdateAsync(
+            new UpdateTicketCommand(
+                staleTicket.Id,
+                "First writer",
+                staleTicket.Description,
+                staleTicket.Priority,
+                department.Id,
+                null,
+                staleTicket.Version),
+            default);
+        Assert.True(winner.IsSuccess);
+        var loser = await staleWriter.UpdateAsync(
+            new UpdateTicketCommand(
+                staleTicket.Id,
+                "Stale writer",
+                staleTicket.Description,
+                staleTicket.Priority,
+                department.Id,
+                null,
+                staleTicket.Version),
+            default);
+        Assert.Equal(TicketErrors.VersionConflict, loser.Error);
+
+        await using var invalidForeignKeyContext = createContext();
+        invalidForeignKeyContext.Tickets.Add(Ticket.Create(
+            "Invalid department",
+            "Must be rejected by the relational foreign key.",
+            TicketPriority.Medium,
+            Guid.NewGuid(),
+            null,
+            now.UtcDateTime));
+        await Assert.ThrowsAsync<DbUpdateException>(() => invalidForeignKeyContext.SaveChangesAsync());
     }
 
     private static async Task AssertLogicalDeletionAsync(Func<ApplicationDbContext> createContext)

@@ -58,6 +58,76 @@ public sealed class TicketAdministrationServiceTests
     }
 
     [Fact]
+    public async Task ListUpdateAndStatusEnforceFiltersVersionAndTransitions()
+    {
+        await using var context = CreateContext();
+        var department = Department.Create("Operations", null, Now.UtcDateTime);
+        context.Departments.Add(department);
+        await context.SaveChangesAsync();
+        var service = new TicketAdministrationService(context, new FixedClock());
+        var created = await service.CreateAsync(
+            new CreateTicketCommand("Printer outage", "Cannot print", TicketPriority.High, department.Id, null),
+            default);
+
+        var page = await service.ListAsync(
+            new TicketListFilter(1, 10, "printer", TicketStatus.Open, TicketPriority.High, department.Id, null),
+            default);
+        Assert.Single(page.Items);
+        Assert.Equal(1, page.TotalCount);
+
+        var updated = await service.UpdateAsync(
+            new UpdateTicketCommand(
+                created.Value!.Id,
+                "Printer restored",
+                "Printing works after restart",
+                TicketPriority.Low,
+                department.Id,
+                null,
+                created.Value.Version),
+            default);
+        Assert.True(updated.IsSuccess);
+        Assert.Equal("Printer restored", updated.Value!.Title);
+
+        var inProgress = await service.ChangeStatusAsync(
+            new ChangeTicketStatusCommand(updated.Value.Id, TicketStatus.InProgress, updated.Value.Version),
+            default);
+        Assert.True(inProgress.IsSuccess);
+
+        var invalid = await service.ChangeStatusAsync(
+            new ChangeTicketStatusCommand(inProgress.Value!.Id, TicketStatus.Open, inProgress.Value.Version),
+            default);
+        Assert.False(invalid.IsSuccess);
+        Assert.Equal("tickets.invalid_transition", invalid.Error!.Code);
+    }
+
+    [Fact]
+    public async Task UpdateRejectsStaleVersionWithoutChangingTicket()
+    {
+        await using var context = CreateContext();
+        var department = Department.Create("Operations", null, Now.UtcDateTime);
+        context.Departments.Add(department);
+        await context.SaveChangesAsync();
+        var service = new TicketAdministrationService(context, new FixedClock());
+        var created = await service.CreateAsync(
+            new CreateTicketCommand("Printer outage", "Cannot print", TicketPriority.High, department.Id, null),
+            default);
+
+        var result = await service.UpdateAsync(
+            new UpdateTicketCommand(
+                created.Value!.Id,
+                "Changed",
+                "Changed description",
+                TicketPriority.Low,
+                department.Id,
+                null,
+                Guid.NewGuid()),
+            default);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("tickets.version_conflict", result.Error!.Code);
+    }
+
+    [Fact]
     public void TicketMappingGeneratesNumberOnAddAndUsesVersionForConcurrency()
     {
         using var context = CreateContext();

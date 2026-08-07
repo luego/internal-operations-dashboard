@@ -17,7 +17,7 @@ Completar un CRUD operativo sencillo de tickets con consultas paginadas, asignac
 - Estado inicial `Open`; transiciones permitidas: `Open -> InProgress|Closed`, `InProgress -> Resolved|Closed`, `Resolved -> InProgress|Closed`; `Closed` es terminal.
 - Versión GUID opaca en cada mutación y conflictos como `tickets.version_conflict`.
 - Listado con página 25/100, búsqueda, estado, prioridad, departamento, agente y orden allowlisted.
-- Policy `Tickets.Create` para crear y `Tickets.Update` para mutar; lecturas requieren autenticación.
+- Policy `Tickets.Create` para crear, `Tickets.Assign` para editar/asignar y `Tickets.ChangeStatus` para transicionar; lecturas usan `Tickets.Read`.
 - No se publica `DELETE`; `IsDeleted` continúa reservado para baja lógica transversal.
 
 ## Requisitos

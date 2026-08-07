@@ -43,6 +43,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRequestValidator<SetUserStatusCommand>, SetUserStatusCommandValidator>();
         services.AddScoped<IRequestValidator<SetUserRolesCommand>, SetUserRolesCommandValidator>();
         services.AddScoped<IRequestValidator<CreateTicketCommand>, CreateTicketCommandValidator>();
+        services.AddScoped<IRequestValidator<ListTicketsQuery>, ListTicketsQueryValidator>();
+        services.AddScoped<IRequestValidator<UpdateTicketCommand>, UpdateTicketCommandValidator>();
+        services.AddScoped<IRequestValidator<ChangeTicketStatusCommand>, ChangeTicketStatusCommandValidator>();
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
         return services;

@@ -35,6 +35,15 @@ public sealed class TicketUseCaseTests
     }
 
     [Fact]
+    public void ListValidatorRejectsUnknownSortField()
+    {
+        var result = new ListTicketsQueryValidator().Validate(new ListTicketsQuery(SortBy: "invalid"));
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("tickets.invalid_list", result.Error!.Code);
+    }
+
+    [Fact]
     public async Task GetHandlerReturnsStableNotFound()
     {
         var result = await new GetTicketQueryHandler(new FakeTicketAdministrationService())
@@ -69,5 +78,11 @@ public sealed class TicketUseCaseTests
         }
 
         public Task<TicketDto?> GetAsync(Guid id, CancellationToken cancellationToken) => Task.FromResult<TicketDto?>(null);
+        public Task<TicketPage> ListAsync(TicketListFilter filter, CancellationToken cancellationToken) =>
+            Task.FromResult(new TicketPage([], filter.Page, filter.PageSize, 0));
+        public Task<Result<TicketDto>> UpdateAsync(UpdateTicketCommand command, CancellationToken cancellationToken) =>
+            Task.FromResult(Result<TicketDto>.Success(Created!));
+        public Task<Result<TicketDto>> ChangeStatusAsync(ChangeTicketStatusCommand command, CancellationToken cancellationToken) =>
+            Task.FromResult(Result<TicketDto>.Success(Created!));
     }
 }
