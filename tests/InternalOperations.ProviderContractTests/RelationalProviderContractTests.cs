@@ -97,8 +97,8 @@ public sealed class RelationalProviderContractTests
         await AssertConcurrentRefreshAsync(services, now);
         await AssertRefreshSessionLifecycleAsync(createContext, now);
         await AssertOptimisticConcurrencyAsync(createContext, sessionId, now);
-        await AssertRestrictedDomainProfileDeletionAsync(createContext);
-        await AssertRestrictedRefreshSessionDeletionAsync(createContext, now);
+        await AssertAccountLogicalDeletionPreservesDomainProfileAsync(createContext);
+        await AssertAccountLogicalDeletionPreservesRefreshSessionAsync(createContext, now);
         await AssertRollbackAndReapplyAsync(createContext);
     }
 
@@ -376,7 +376,7 @@ public sealed class RelationalProviderContractTests
         await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => loserContext.SaveChangesAsync());
     }
 
-    private static async Task AssertRestrictedDomainProfileDeletionAsync(
+    private static async Task AssertAccountLogicalDeletionPreservesDomainProfileAsync(
         Func<ApplicationDbContext> createContext)
     {
         await using var context = createContext();
@@ -391,10 +391,17 @@ public sealed class RelationalProviderContractTests
         context.ChangeTracker.Clear();
         var persistedAccount = await context.Set<IdentityAccount>().SingleAsync(x => x.Id == account.Id);
         context.Remove(persistedAccount);
-        await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
+        await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
+        Assert.False(await context.Set<IdentityAccount>().AnyAsync(x => x.Id == account.Id));
+        var deletedAccount = await context.Set<IdentityAccount>().IgnoreQueryFilters().SingleAsync(x => x.Id == account.Id);
+        Assert.True(deletedAccount.IsDeleted);
+        Assert.False(deletedAccount.IsActive);
+        Assert.True(await context.DomainUsers.AnyAsync(x => x.Id == account.Id));
     }
 
-    private static async Task AssertRestrictedRefreshSessionDeletionAsync(
+    private static async Task AssertAccountLogicalDeletionPreservesRefreshSessionAsync(
         Func<ApplicationDbContext> createContext,
         DateTimeOffset now)
     {
@@ -416,7 +423,11 @@ public sealed class RelationalProviderContractTests
         context.ChangeTracker.Clear();
         var persistedAccount = await context.Set<IdentityAccount>().SingleAsync(x => x.Id == account.Id);
         context.Remove(persistedAccount);
-        await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
+        await context.SaveChangesAsync();
+
+        context.ChangeTracker.Clear();
+        Assert.False(await context.Set<IdentityAccount>().AnyAsync(x => x.Id == account.Id));
+        Assert.True(await context.RefreshTokenSessions.AnyAsync(x => x.UserId == account.Id));
     }
 
     private static async Task AssertRollbackAndReapplyAsync(Func<ApplicationDbContext> createContext)
