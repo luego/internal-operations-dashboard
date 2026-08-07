@@ -1,6 +1,6 @@
 # 010 — Identity and Access: Design
 
-**Estado:** Implementing
+**Estado:** Completed
 **Requisitos:** `requirements.md`
 **Fecha:** 6 de agosto de 2026
 **Aprobada:** 6 de agosto de 2026

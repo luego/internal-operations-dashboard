@@ -4,9 +4,11 @@ Backend-first internal operations system for tickets, departments, users, commen
 
 The repository has completed **phase 1: application and persistence foundation**. It contains the project boundaries, cross-cutting application primitives, EF Core persistence adapters, dual-provider composition and a minimal ticket-creation endpoint that validates the vertical architecture.
 
-**Phase 2: identity and access** is now implementing. The current checkpoint includes ASP.NET Core Identity, JWT access tokens, rotating refresh sessions with replay-family revocation, role policies, secure Development seeding, authentication rate limits, OpenAPI bearer metadata and separate EF Core migrations for PostgreSQL and SQL Server. The real PostgreSQL/SQL Server contract matrix remains open before the phase can be marked completed.
+**Phase 2: identity and access** is completed. The backend includes ASP.NET Core Identity, JWT access tokens, rotating refresh sessions with replay-family revocation, role policies, secure Development seeding, authentication rate limits, OpenAPI bearer metadata and separate EF Core migrations verified on PostgreSQL and SQL Server.
 
-**Phase 3: departments and users** has an approved specification. Phase 3 production code remains blocked until the phase 2 provider matrix has been published and observed successfully, unless a documented waiver is approved.
+**Logical deletion** is the active cross-cutting increment. Business entities use `IsDeleted` so normal operations retain records instead of physically deleting them.
+
+**Phase 3: departments and users** has an approved specification and is the next feature increment.
 
 ## Prerequisites
 
@@ -125,9 +127,12 @@ Shared <- stable technical primitives only
 - [Application and persistence requirements](specs/005-application-and-persistence-foundation/requirements.md)
 - [Application and persistence design](specs/005-application-and-persistence-foundation/design.md)
 - [Application and persistence tasks and evidence](specs/005-application-and-persistence-foundation/tasks.md)
-- [Identity and access requirements — Implementing](specs/010-identity-and-access/requirements.md)
-- [Identity and access design — Implementing](specs/010-identity-and-access/design.md)
-- [Identity and access tasks and evidence — Implementing](specs/010-identity-and-access/tasks.md)
+- [Identity and access requirements — Completed](specs/010-identity-and-access/requirements.md)
+- [Identity and access design — Completed](specs/010-identity-and-access/design.md)
+- [Identity and access tasks and evidence — Completed](specs/010-identity-and-access/tasks.md)
+- [Logical deletion requirements — Approved](specs/015-logical-deletion/requirements.md)
+- [Logical deletion design — Approved](specs/015-logical-deletion/design.md)
+- [Logical deletion tasks — Implementing](specs/015-logical-deletion/tasks.md)
 - [Departments and users requirements — Approved](specs/020-departments-and-users/requirements.md)
 - [Departments and users design — Approved](specs/020-departments-and-users/design.md)
 - [Departments and users tasks — Approved](specs/020-departments-and-users/tasks.md)

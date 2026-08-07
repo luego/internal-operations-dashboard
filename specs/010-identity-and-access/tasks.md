@@ -1,6 +1,6 @@
 # 010 — Identity and Access: Tasks
 
-**Estado:** Implementing
+**Estado:** Completed
 **Fecha:** 6 de agosto de 2026
 **Aprobada:** 6 de agosto de 2026
 **Requisitos:** `requirements.md`
@@ -57,7 +57,7 @@
 
 ## Ola 2 — Casos de uso de sesión
 
-- [ ] **TASK-SEC-005 Implementar generación, rotación, replay handling y logout**
+- [x] **TASK-SEC-005 Implementar generación, rotación, replay handling y logout**
   - Requisitos: REQ-AUTH-003, REQ-AUTH-004, REQ-AUTH-NF-003, REQ-AUTH-NF-004.
   - Generar token opaco criptográfico, retornar plaintext una sola vez y persistir hash.
   - Implementar repositorio de sesión y handlers de refresh/logout.
@@ -66,7 +66,7 @@
   - Pruebas: success, unknown, expired, revoked, replay, concurrency y logout idempotente.
   - Verificación: unit tests + contrato de persistencia en ambos providers.
 
-- [ ] **TASK-SEC-006 Implementar login**
+- [x] **TASK-SEC-006 Implementar login**
   - Requisitos: REQ-AUTH-001, REQ-AUTH-005.
   - Crear request/command/validator/handler/result.
   - Coordinar autenticación, access token, refresh session y commit.
@@ -85,7 +85,7 @@
 
 ## Ola 3 — API y hardening
 
-- [ ] **TASK-SEC-008 Publicar endpoints y contrato bearer**
+- [x] **TASK-SEC-008 Publicar endpoints y contrato bearer**
   - Requisitos: REQ-AUTH-001..007, REQ-AUTH-NF-005.
   - Implementar `POST /api/v1/auth/login`, `/refresh` y `/logout` con DTOs HTTP separados.
   - Configurar JwtBearer challenge/forbid con ProblemDetails seguro.
@@ -101,7 +101,7 @@
   - Pruebas: disabled, missing secrets, first run, repeated run y non-Development.
   - Verificación: integration tests y revisión de archivos/configuración por secretos.
 
-- [ ] **TASK-SEC-010 Configurar rate limiting y límites de request**
+- [x] **TASK-SEC-010 Configurar rate limiting y límites de request**
   - Requisitos: REQ-AUTH-009.
   - Agregar policies nombradas de 5/min login y 30/min refresh con queue deshabilitada.
   - Implementar partición normalizada/hasheada sin credenciales y respuesta `429` con `Retry-After`.
@@ -111,14 +111,14 @@
 
 ## Ola 4 — Migraciones y matriz de providers
 
-- [ ] **TASK-SEC-011 Crear migraciones de identidad para PostgreSQL y SQL Server**
+- [x] **TASK-SEC-011 Crear migraciones de identidad para PostgreSQL y SQL Server**
   - Requisitos: REQ-AUTH-003, REQ-AUTH-NF-002.
   - Crear migraciones separadas para Identity, perfil correlacionado y refresh sessions.
   - Revisar nombres, longitudes, índices, foreign keys, delete behavior y concurrency.
   - Probar apply desde base vacía y rollback soportado para ambos providers.
   - Evidencia: comandos, migraciones aplicadas y esquema validado sin connection strings.
 
-- [ ] **TASK-SEC-012 Ejecutar contrato de autenticación en ambos providers**
+- [x] **TASK-SEC-012 Ejecutar contrato de autenticación en ambos providers**
   - Requisitos: todos los requisitos funcionales y REQ-AUTH-NF-002.
   - Ejecutar la misma suite de login/session/lockout/concurrency sobre PostgreSQL y SQL Server efímeros.
   - Confirmar que no hay tests ignorados ni branches específicos sin fallback.
@@ -131,7 +131,7 @@
   - Ejecutar auditoría de paquetes con las herramientas del repositorio y clasificar cualquier advisory.
   - Verificar que Domain/Application no contienen referencias de Identity/JWT/ASP.NET auth.
 
-- [ ] **TASK-SEC-014 Ejecutar checks equivalentes a CI**
+- [x] **TASK-SEC-014 Ejecutar checks equivalentes a CI**
   - `dotnet tool restore`.
   - `dotnet restore InternalOperations.slnx --locked-mode`.
   - `dotnet format InternalOperations.slnx --verify-no-changes --no-restore`.
@@ -140,7 +140,7 @@
   - Ejecutar adicionalmente la matriz real PostgreSQL/SQL Server definida por esta spec si aún no forma parte del comando global.
   - Salida requerida: 0 warnings, 0 errores, 0 tests fallidos y 0 tests omitidos sin justificación.
 
-- [ ] **TASK-SEC-015 Sincronizar spec y documentación**
+- [x] **TASK-SEC-015 Sincronizar spec y documentación**
   - Actualizar evidencia por requisito/tarea, README, configuración de ejemplo, OpenAPI y runbook de Development.
   - Marcar `requirements.md`, `design.md` y `tasks.md` como `Completed` solo cuando toda evidencia sea reproducible.
   - Confirmar working tree limpio, commit publicado y hosted CI observado por separado de los checks locales.
@@ -159,21 +159,16 @@
 
 ## Evidencia del checkpoint de implementación
 
-- Iteración de migraciones dual-provider aprobada por el usuario el 7 de agosto de 2026; la aprobación acepta el checkpoint implementado, pero no sustituye la evidencia pendiente sobre PostgreSQL y SQL Server reales.
+- La iteración dual-provider fue aprobada y quedó cerrada con evidencia alojada el 7 de agosto de 2026.
 - Restore locked: `dotnet restore InternalOperations.slnx --locked-mode` completó correctamente.
 - Formato: `dotnet format InternalOperations.slnx --verify-no-changes --no-restore` completó correctamente.
-- Build Release CI: compiló con `0` errores. Este host ARM reporta `NETSDK1188` para recursos localizados de paquetes de terceros; no se atribuyen al código, pero `TASK-SEC-014` permanece abierta porque el criterio exige `0` warnings.
-- Suite local: `58/58` pruebas aprobadas, `0` fallos y `0` omitidas:
-  - API Integration: `24`.
-  - Application Unit: `16`.
-  - Architecture: `10`.
-  - Domain Unit: `1`.
-  - Persistence Integration: `7`.
+- Build Release CI local: `0` warnings y `0` errores con `ContinuousIntegrationBuild=true`.
+- Suite local rápida: `58/58` pruebas aprobadas, `0` fallos y `0` omitidas antes de ejecutar la matriz relacional.
 - Auditoría NuGet: ningún paquete vulnerable detectado mediante `dotnet list InternalOperations.slnx package --vulnerable --include-transitive`.
-- Revisión de seguridad: sin secretos de autenticación versionados, sin refresh tokens persistidos en plaintext, algoritmo JWT fijado, límites aprobados validados y fronteras Domain/Application protegidas por los `10` architecture tests.
-- Migraciones: `InitialIdentityAndAccess` existe en assemblies separados para PostgreSQL y SQL Server; ambos snapshots están sincronizados (`dotnet ef migrations has-pending-model-changes`) y generan scripts idempotentes de `321` y `354` líneas respectivamente.
-- Matriz preparada: `InternalOperations.ProviderContractTests` y el job `provider-contracts` de GitHub Actions ejecutan migración, unicidad del hash de refresh, relaciones restrictivas, concurrencia optimista, rollback y reaplicación por separado para PostgreSQL y SQL Server mediante Testcontainers, sin credenciales versionadas.
-- Pendiente reproducible: el código de la matriz compila localmente, pero no hubo ejecución relacional porque el daemon Docker no está disponible en este host y este commit aún no se ha publicado por decisión del usuario. `TASK-SEC-011`, `TASK-SEC-012` y cualquier tarea que requiera evidencia real permanecen abiertas hasta observar ambos jobs alojados.
+- Revisión de seguridad: sin secretos de autenticación versionados, sin refresh tokens persistidos en plaintext, algoritmo JWT fijado, límites aprobados validados y fronteras Domain/Application protegidas por los architecture tests.
+- Migraciones: `InitialIdentityAndAccess` existe en assemblies separados para PostgreSQL y SQL Server; ambos snapshots estaban sincronizados antes del cierre.
+- Contrato relacional por handlers: login por username/email, roles, lockout, hash de refresh, rotación, replay, revocación familiar, logout idempotente y carrera de refresh con un único ganador.
+- Hosted CI del commit `68e7ab0`: [run 31203042580](https://github.com/luego/internal-operations-dashboard/actions/runs/31203042580), con `Foundation checks`, `Provider contracts (PostgreSql)` y `Provider contracts (SqlServer)` exitosos.
 
 ## Salida esperada
 

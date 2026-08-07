@@ -6,7 +6,7 @@
 **Requisitos:** `requirements.md`
 **Diseño:** `design.md`
 **Dependencia:** `../010-identity-and-access/`
-**Gate de implementación:** requisitos, diseño y tareas aprobados; pendiente `GATE-DU-001`
+**Gate de implementación:** `GATE-DU-000` y `GATE-DU-001` cerrados; implementación desbloqueada.
 
 ## Convenciones
 
@@ -27,9 +27,9 @@
   - Cambiar los tres documentos de `Proposed` a `Approved` en un commit documental.
   - Evidencia: aprobación explícita del usuario registrada el 7 de agosto de 2026.
 
-- [ ] **GATE-DU-001 Cerrar dependencia 010**
-  - Publicar los commits locales de migraciones/provider matrix cuando el usuario lo autorice.
-  - Observar foundation, PostgreSQL y SQL Server exitosos en hosted CI.
+- [x] **GATE-DU-001 Cerrar dependencia 010**
+  - Spec 010 completada y publicada.
+  - Hosted CI [run 31203042580](https://github.com/luego/internal-operations-dashboard/actions/runs/31203042580): foundation, PostgreSQL y SQL Server exitosos.
   - Reconciliar y cerrar honestamente `TASK-SEC-011`, `TASK-SEC-012`, `TASK-SEC-014` y `TASK-SEC-015`.
   - `requirements.md`, `design.md` y `tasks.md` de 010 deben pasar juntos a `Completed`.
   - Alternativa: waiver explícito que delimite riesgo; no se presume.

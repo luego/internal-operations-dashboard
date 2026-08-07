@@ -1,6 +1,6 @@
 # 010 — Identity and Access: Requirements
 
-**Estado:** Implementing
+**Estado:** Completed
 **Fecha:** 6 de agosto de 2026
 **Aprobada:** 6 de agosto de 2026
 **Basado en:** Fase 2 del documento maestro: Identidad y seguridad
