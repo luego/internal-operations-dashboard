@@ -8,7 +8,7 @@ The repository has completed **phase 1: application and persistence foundation**
 
 **Logical deletion** is completed. Business entities use `IsDeleted` so normal operations retain records instead of physically deleting them; the contract and migrations are verified on PostgreSQL and SQL Server.
 
-**Phase 3: departments and users** has an approved specification and is the active feature increment.
+**Phase 3: departments and users** is implemented locally and remains the active increment while hosted PostgreSQL and SQL Server verification is pending. It provides authorized, paginated administration for departments and users, synchronized Identity/domain profiles, role and department assignment, activation/deactivation, refresh-session revocation, optimistic concurrency and provider-specific migrations.
 
 ## Prerequisites
 
@@ -133,9 +133,9 @@ Shared <- stable technical primitives only
 - [Logical deletion requirements — Completed](specs/015-logical-deletion/requirements.md)
 - [Logical deletion design — Completed](specs/015-logical-deletion/design.md)
 - [Logical deletion tasks — Completed](specs/015-logical-deletion/tasks.md)
-- [Departments and users requirements — Approved](specs/020-departments-and-users/requirements.md)
-- [Departments and users design — Approved](specs/020-departments-and-users/design.md)
-- [Departments and users tasks — Approved](specs/020-departments-and-users/tasks.md)
+- [Departments and users requirements — Implementing](specs/020-departments-and-users/requirements.md)
+- [Departments and users design — Implementing](specs/020-departments-and-users/design.md)
+- [Departments and users tasks and local evidence — Implementing](specs/020-departments-and-users/tasks.md)
 - [Architecture decision records](docs/adr/)
 
 Changes are developed from an approved feature spec. Requirements, design, tasks, tests and evidence must remain synchronized. Frontend work is outside the current backend scope.
