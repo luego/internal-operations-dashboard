@@ -1,6 +1,6 @@
 # 015 — Logical Deletion: Design
 
-**Estado:** Approved
+**Estado:** Completed
 **Requisitos:** `requirements.md`
 
 ## Diseño mínimo

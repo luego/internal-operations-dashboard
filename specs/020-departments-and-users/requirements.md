@@ -4,12 +4,12 @@
 **Fecha:** 7 de agosto de 2026
 **Aprobación:** Aprobada explícitamente por el usuario el 7 de agosto de 2026.
 **Basado en:** Fase 3 del documento maestro: Departamentos y usuarios
-**Dependencia:** `../010-identity-and-access/`
-**Gate:** Requisitos aprobados; la implementación permanece sujeta a `GATE-DU-001`.
+**Dependencias:** `../010-identity-and-access/` y `../015-logical-deletion/`
+**Gate:** Requisitos aprobados y `GATE-DU-001` cerrado; implementación desbloqueada.
 
 ## 1. Objetivo
 
-Incorporar administración segura de departamentos y usuarios internos, manteniendo consistentes la cuenta técnica de Identity y el perfil de dominio, con listados paginados, asignación a un único departamento, baja lógica, concurrencia optimista y el mismo contrato observable en PostgreSQL y SQL Server.
+Incorporar administración segura de departamentos y usuarios internos, manteniendo consistentes la cuenta técnica de Identity y el perfil de dominio, con listados paginados, asignación a un único departamento, activación/desactivación administrativa, concurrencia optimista y el mismo contrato observable en PostgreSQL y SQL Server.
 
 ## 2. Alcance
 
@@ -19,7 +19,7 @@ Incluye:
 - creación y administración de cuentas/perfiles internos;
 - asignación opcional de un usuario a un único departamento;
 - reemplazo del conjunto de roles canónicos de un usuario;
-- activación y desactivación lógica de usuarios;
+- activación y desactivación administrativa de usuarios mediante `IsActive`;
 - revocación de sesiones refresh cuando se desactiva un usuario o se reducen sus roles;
 - paginación, búsqueda, filtros y ordenación allowlisted;
 - concurrencia optimista portable;
@@ -37,7 +37,7 @@ No incluye:
 - revocación inmediata de access tokens ya emitidos;
 - frontend.
 
-En esta spec, las operaciones de eliminación del CRUD se expresan mediante activación/desactivación. No se publicarán endpoints `DELETE`.
+Esta spec no publica endpoints `DELETE`. Activar/desactivar modifica exclusivamente `IsActive`: los registros inactivos continúan visibles y administrables. `IsDeleted` y su filtro global pertenecen a la spec 015 y no se activan desde los endpoints de estado de esta fase.
 
 ## 3. Decisiones funcionales propuestas
 

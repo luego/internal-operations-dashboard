@@ -6,9 +6,9 @@ The repository has completed **phase 1: application and persistence foundation**
 
 **Phase 2: identity and access** is completed. The backend includes ASP.NET Core Identity, JWT access tokens, rotating refresh sessions with replay-family revocation, role policies, secure Development seeding, authentication rate limits, OpenAPI bearer metadata and separate EF Core migrations verified on PostgreSQL and SQL Server.
 
-**Logical deletion** is the active cross-cutting increment. Business entities use `IsDeleted` so normal operations retain records instead of physically deleting them.
+**Logical deletion** is completed. Business entities use `IsDeleted` so normal operations retain records instead of physically deleting them; the contract and migrations are verified on PostgreSQL and SQL Server.
 
-**Phase 3: departments and users** has an approved specification and is the next feature increment.
+**Phase 3: departments and users** has an approved specification and is the active feature increment.
 
 ## Prerequisites
 
@@ -130,9 +130,9 @@ Shared <- stable technical primitives only
 - [Identity and access requirements — Completed](specs/010-identity-and-access/requirements.md)
 - [Identity and access design — Completed](specs/010-identity-and-access/design.md)
 - [Identity and access tasks and evidence — Completed](specs/010-identity-and-access/tasks.md)
-- [Logical deletion requirements — Approved](specs/015-logical-deletion/requirements.md)
-- [Logical deletion design — Approved](specs/015-logical-deletion/design.md)
-- [Logical deletion tasks — Implementing](specs/015-logical-deletion/tasks.md)
+- [Logical deletion requirements — Completed](specs/015-logical-deletion/requirements.md)
+- [Logical deletion design — Completed](specs/015-logical-deletion/design.md)
+- [Logical deletion tasks — Completed](specs/015-logical-deletion/tasks.md)
 - [Departments and users requirements — Approved](specs/020-departments-and-users/requirements.md)
 - [Departments and users design — Approved](specs/020-departments-and-users/design.md)
 - [Departments and users tasks — Approved](specs/020-departments-and-users/tasks.md)

@@ -1,6 +1,6 @@
 # 015 — Logical Deletion: Tasks
 
-**Estado:** Implementing
+**Estado:** Completed
 **Requisitos:** `requirements.md`
 **Diseño:** `design.md`
 
@@ -20,12 +20,12 @@
   - Crear `AddLogicalDeletion` en ambos assemblies.
   - Confirmar snapshots sincronizados y scripts válidos.
 
-- [ ] **TASK-DEL-004 Verificar contratos**
+- [x] **TASK-DEL-004 Verificar contratos**
   - Probar visibilidad normal, `IgnoreQueryFilters`, persistencia física y autenticación.
   - Ampliar provider matrix para PostgreSQL y SQL Server.
   - Ejecutar format, build estricto y suite completa.
 
-- [ ] **TASK-DEL-005 Sincronizar documentación**
+- [x] **TASK-DEL-005 Sincronizar documentación**
   - Actualizar README, spec 020 y evidencia.
   - Marcar la spec `Completed` solo con checks verdes.
 
@@ -37,4 +37,4 @@
 - Format verify: aprobado.
 - Build Release con `ContinuousIntegrationBuild=true`: `0` warnings y `0` errores usando ICU local.
 - Suite local sin provider matrix: `61/61` pruebas aprobadas, `0` fallos.
-- Pendiente para cerrar `TASK-DEL-004`: observar el contrato relacional actualizado en PostgreSQL y SQL Server alojados.
+- Hosted CI del commit `7d211cf`: [run 31206235991](https://github.com/luego/internal-operations-dashboard/actions/runs/31206235991), con foundation, PostgreSQL y SQL Server exitosos.

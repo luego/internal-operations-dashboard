@@ -1,6 +1,6 @@
 # 015 — Logical Deletion
 
-**Estado:** Approved
+**Estado:** Completed
 **Fecha:** 7 de agosto de 2026
 **Aprobación:** El usuario autorizó el cambio transversal y continuar sin gates adicionales el 7 de agosto de 2026.
 **Dependencias:** `../010-identity-and-access/`

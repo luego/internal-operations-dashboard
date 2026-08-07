@@ -88,9 +88,9 @@
 - [ ] **TASK-DU-008 Generar migraciones incrementales dual-provider**
   - Requisitos: `REQ-DU-NF-003`, `REQ-DU-NF-006`.
   - Diseño: `DES-DU-004`, `DES-DU-011`.
-  - Crear `DepartmentsAndUsers` en ambos assemblies sin editar `InitialIdentityAndAccess`.
+  - Crear migraciones incrementales por corte vertical en ambos assemblies sin editar `InitialIdentityAndAccess` ni `AddLogicalDeletion`.
   - Revisar backfill, duplicados, longitudes, índices, FKs, versiones, email único filtrado y `Down`.
-  - `TEST-MIG-DU-001..006`: apply vacío, upgrade desde 010 y rollback/reapply en cada provider.
+  - `TEST-MIG-DU-001..006`: apply vacío, upgrade desde 010 + 015 y rollback/reapply en cada provider.
   - No cerrar con scripts/snapshots sin bases reales.
 
 ## Ola 3 — Departments vertical slices

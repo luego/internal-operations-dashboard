@@ -352,7 +352,7 @@ Conflictos transitorios/deadlocks se delegan a la execution strategy. Tras agota
 
 ### DES-DU-011 Migración incremental
 
-No se modifica `InitialIdentityAndAccess`. Se genera `DepartmentsAndUsers` en cada assembly:
+No se modifican `InitialIdentityAndAccess` ni `AddLogicalDeletion`. La implementación puede generar migraciones incrementales por corte vertical (`DepartmentsFoundation` y `UsersFoundation`) en cada assembly:
 
 - `InternalOperations.Persistence.Migrations.PostgreSql`;
 - `InternalOperations.Persistence.Migrations.SqlServer`.
