@@ -166,7 +166,8 @@ namespace InternalOperations.Persistence.Migrations.SqlServer.Migrations
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -179,11 +180,18 @@ namespace InternalOperations.Persistence.Migrations.SqlServer.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("DepartmentId", "IsActive");
+
+                    b.HasIndex("IsActive", "DisplayName");
 
                     b.ToTable("Users");
                 });
@@ -254,7 +262,9 @@ namespace InternalOperations.Persistence.Migrations.SqlServer.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
+                        .IsUnique()
+                        .HasDatabaseName("EmailIndex")
+                        .HasFilter("[NormalizedEmail] IS NOT NULL");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
@@ -482,7 +492,8 @@ namespace InternalOperations.Persistence.Migrations.SqlServer.Migrations
                 {
                     b.HasOne("InternalOperations.Domain.Departments.Department", "Department")
                         .WithMany("Users")
-                        .HasForeignKey("DepartmentId");
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("InternalOperations.Persistence.Authentication.IdentityAccount", null)
                         .WithOne()

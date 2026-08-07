@@ -20,15 +20,45 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.Entity<IdentityAccount>().ToTable("IdentityUsers");
-        builder.Entity<IdentityAccount>().HasQueryFilter(x => !x.IsDeleted);
+        builder.Entity<IdentityAccount>(entity =>
+        {
+            entity.ToTable("IdentityUsers");
+            entity.HasQueryFilter(x => !x.IsDeleted);
+            var emailIndex = entity.HasIndex(x => x.NormalizedEmail)
+                .HasDatabaseName("EmailIndex")
+                .IsUnique();
+            if (Database.IsNpgsql())
+            {
+                emailIndex.HasFilter("\"NormalizedEmail\" IS NOT NULL");
+            }
+            else if (Database.IsSqlServer())
+            {
+                emailIndex.HasFilter("[NormalizedEmail] IS NOT NULL");
+            }
+        });
         builder.Entity<IdentityRole<Guid>>().ToTable("IdentityRoles");
         builder.Entity<IdentityUserRole<Guid>>().ToTable("IdentityUserRoles");
         builder.Entity<IdentityUserClaim<Guid>>().ToTable("IdentityUserClaims");
         builder.Entity<IdentityUserLogin<Guid>>().ToTable("IdentityUserLogins");
         builder.Entity<IdentityRoleClaim<Guid>>().ToTable("IdentityRoleClaims");
         builder.Entity<IdentityUserToken<Guid>>().ToTable("IdentityUserTokens");
-        builder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
+        builder.Entity<User>(entity =>
+        {
+            entity.HasQueryFilter(x => !x.IsDeleted);
+            entity.Property(x => x.UserName).HasMaxLength(256).IsRequired();
+            entity.Property(x => x.DisplayName).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Version).IsConcurrencyToken();
+            entity.HasIndex(x => new { x.DepartmentId, x.IsActive });
+            entity.HasIndex(x => new { x.IsActive, x.DisplayName });
+            entity.HasOne(x => x.Department)
+                .WithMany(x => x.Users)
+                .HasForeignKey(x => x.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<IdentityAccount>()
+                .WithOne()
+                .HasForeignKey<User>(x => x.Id)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
         builder.Entity<Department>(entity =>
         {
             entity.HasQueryFilter(x => !x.IsDeleted);
@@ -48,11 +78,6 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
         });
         builder.Entity<Ticket>().HasQueryFilter(x => !x.IsDeleted);
         builder.Entity<TicketComment>().HasQueryFilter(x => !x.IsDeleted);
-        builder.Entity<User>()
-            .HasOne<IdentityAccount>()
-            .WithOne()
-            .HasForeignKey<User>(x => x.Id)
-            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<RefreshTokenSessionEntity>(entity =>
         {

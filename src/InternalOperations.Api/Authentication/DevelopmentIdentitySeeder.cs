@@ -39,7 +39,7 @@ public sealed class DevelopmentIdentitySeeder(IServiceProvider services, IHostEn
             .SingleOrDefaultAsync(user => user.Id == account.Id, cancellationToken);
         if (profile is null)
         {
-            context.DomainUsers.Add(new User(account.Id, seed.AdministratorIdentifier, seed.AdministratorDisplayName));
+            context.DomainUsers.Add(User.Create(account.Id, seed.AdministratorIdentifier, seed.AdministratorDisplayName));
             await context.SaveChangesAsync(cancellationToken);
         }
         else if (profile.IsDeleted)

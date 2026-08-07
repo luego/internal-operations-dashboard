@@ -76,10 +76,11 @@ public sealed class RelationalProviderContractTests
                 DisplayName = "Provider Matrix Agent",
                 IsActive = true,
             });
-            context.DomainUsers.Add(new User(userId, "provider-matrix-agent", "Provider Matrix Agent")
-            {
-                CreatedAtUtc = DateTime.UtcNow,
-            });
+            context.DomainUsers.Add(User.Create(
+                userId,
+                "provider-matrix-agent",
+                "Provider Matrix Agent",
+                createdAtUtc: DateTime.UtcNow));
             context.Set<RefreshTokenSessionEntity>().Add(
                 new RefreshTokenSessionEntity(
                     new RefreshTokenSession(
@@ -95,6 +96,7 @@ public sealed class RelationalProviderContractTests
 
         await AssertUniqueTokenHashAsync(createContext, userId, tokenHash, now);
         await AssertDepartmentFoundationAsync(createContext);
+        await AssertUserFoundationAsync(createContext);
         await AssertLogicalDeletionAsync(createContext);
         await AssertAuthenticationAndLockoutAsync(services);
         await AssertHandlerSessionContractAsync(services, now);
@@ -167,6 +169,50 @@ public sealed class RelationalProviderContractTests
             context.Departments.Add(Department.Create("Provider Customer Operations", "Reused after logical deletion", createdAtUtc));
             await context.SaveChangesAsync();
         }
+    }
+
+    private static async Task AssertUserFoundationAsync(Func<ApplicationDbContext> createContext)
+    {
+        var id = Guid.NewGuid();
+        await using (var context = createContext())
+        {
+            context.Users.Add(new IdentityAccount
+            {
+                Id = id,
+                UserName = "user-foundation",
+                NormalizedUserName = "USER-FOUNDATION",
+                Email = "foundation@example.test",
+                NormalizedEmail = "FOUNDATION@EXAMPLE.TEST",
+                DisplayName = "User Foundation",
+                IsActive = true,
+            });
+            context.DomainUsers.Add(User.Create(id, "user-foundation", "User Foundation", null, DateTime.UtcNow));
+            await context.SaveChangesAsync();
+        }
+
+        await using (var context = createContext())
+        {
+            context.Users.Add(new IdentityAccount
+            {
+                Id = Guid.NewGuid(),
+                UserName = "user-foundation-duplicate-email",
+                NormalizedUserName = "USER-FOUNDATION-DUPLICATE-EMAIL",
+                Email = "FOUNDATION@example.test",
+                NormalizedEmail = "FOUNDATION@EXAMPLE.TEST",
+                DisplayName = "Duplicate Email",
+                IsActive = true,
+            });
+            await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
+        }
+
+        await using var firstContext = createContext();
+        await using var secondContext = createContext();
+        var first = await firstContext.DomainUsers.SingleAsync(x => x.Id == id);
+        var stale = await secondContext.DomainUsers.SingleAsync(x => x.Id == id);
+        first.UpdateProfile("user-foundation", "First Writer", DateTime.UtcNow.AddMinutes(1));
+        await firstContext.SaveChangesAsync();
+        stale.UpdateProfile("user-foundation", "Stale Writer", DateTime.UtcNow.AddMinutes(2));
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => secondContext.SaveChangesAsync());
     }
 
     private static async Task AssertLogicalDeletionAsync(Func<ApplicationDbContext> createContext)
@@ -449,10 +495,11 @@ public sealed class RelationalProviderContractTests
         await using var context = createContext();
         var account = Account("profile-restrict-agent");
         context.Set<IdentityAccount>().Add(account);
-        context.DomainUsers.Add(new User(account.Id, account.UserName!, "Profile Restrict Agent")
-        {
-            CreatedAtUtc = DateTime.UtcNow,
-        });
+        context.DomainUsers.Add(User.Create(
+            account.Id,
+            account.UserName!,
+            "Profile Restrict Agent",
+            createdAtUtc: DateTime.UtcNow));
         await context.SaveChangesAsync();
 
         context.ChangeTracker.Clear();

@@ -13,6 +13,28 @@ public sealed class OpenApiAuthenticationTests : IClassFixture<WebApplicationFac
     public OpenApiAuthenticationTests(WebApplicationFactory<Program> factory) => _factory = factory;
 
     [Fact]
+    public async Task UserCreationPasswordIsWriteOnlyAndFormattedAsPassword()
+    {
+        using var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment("Development");
+            builder.UseSetting("Authentication:Jwt:Issuer", "openapi-tests");
+            builder.UseSetting("Authentication:Jwt:Audience", "internal-operations-api");
+            builder.UseSetting("Authentication:Jwt:SigningKey", SigningKey);
+            builder.UseSetting("Authentication:Seed:Enabled", "false");
+        }).CreateClient();
+
+        using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
+        var schemas = document.RootElement.GetProperty("components").GetProperty("schemas");
+        var request = schemas.EnumerateObject().Single(schema => schema.Name.EndsWith("CreateUserRequest", StringComparison.Ordinal)).Value;
+        var password = request.GetProperty("properties").GetProperty("initialPassword");
+
+        Assert.Equal("password", password.GetProperty("format").GetString());
+        Assert.True(password.GetProperty("writeOnly").GetBoolean());
+        Assert.DoesNotContain("example", password.EnumerateObject().Select(property => property.Name));
+    }
+
+    [Fact]
     public async Task DevelopmentDocumentDescribesBearerAndProtectedOperationsWithoutSecrets()
     {
         using var client = _factory.WithWebHostBuilder(builder =>

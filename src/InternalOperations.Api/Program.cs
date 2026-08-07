@@ -27,6 +27,15 @@ builder.Services.AddOpenApi(options =>
             BearerFormat = "JWT",
             Description = "JWT access token supplied as: Bearer {token}.",
         };
+        if (document.Components.Schemas?.TryGetValue(nameof(InternalOperations.Api.Controllers.v1.CreateUserRequest), out var createUserSchema) == true
+            && createUserSchema is OpenApiSchema requestSchema
+            && requestSchema.Properties?.TryGetValue("initialPassword", out var passwordProperty) == true
+            && passwordProperty is OpenApiSchema passwordSchema)
+        {
+            passwordSchema.Format = "password";
+            passwordSchema.WriteOnly = true;
+            passwordSchema.Example = null;
+        }
         var bearerRequirement = new OpenApiSecurityRequirement
         {
             [new OpenApiSecuritySchemeReference("Bearer", document)] = [],

@@ -7,6 +7,7 @@ using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Application.Abstractions.Services;
 using InternalOperations.Application.Common.Authorization;
 using InternalOperations.Application.Features.Departments;
+using InternalOperations.Application.Features.Users;
 using InternalOperations.Application.Services;
 using InternalOperations.Infrastructure;
 using InternalOperations.Infrastructure.Authentication;
@@ -34,6 +35,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRequestValidator<ListDepartmentsQuery>, ListDepartmentsQueryValidator>();
         services.AddScoped<IRequestValidator<UpdateDepartmentCommand>, UpdateDepartmentCommandValidator>();
         services.AddScoped<IRequestValidator<SetDepartmentStatusCommand>, SetDepartmentStatusCommandValidator>();
+        services.AddScoped<IRequestValidator<CreateUserCommand>, CreateUserCommandValidator>();
+        services.AddScoped<IRequestValidator<ListUsersQuery>, ListUsersQueryValidator>();
+        services.AddScoped<IRequestValidator<UpdateUserCommand>, UpdateUserCommandValidator>();
+        services.AddScoped<IRequestValidator<SetUserDepartmentCommand>, SetUserDepartmentCommandValidator>();
+        services.AddScoped<IRequestValidator<SetUserStatusCommand>, SetUserStatusCommandValidator>();
+        services.AddScoped<IRequestValidator<SetUserRolesCommand>, SetUserRolesCommandValidator>();
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
         return services;
@@ -71,6 +78,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IDepartmentReadService, DepartmentReadService>();
+        services.AddScoped<IUserAdministrationService, UserAdministrationService>();
         services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
         return services;
     }
