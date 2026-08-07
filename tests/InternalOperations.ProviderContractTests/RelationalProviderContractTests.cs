@@ -151,7 +151,9 @@ public sealed class RelationalProviderContractTests
         });
         await context.SaveChangesAsync();
 
-        context.Remove(account);
+        context.ChangeTracker.Clear();
+        var persistedAccount = await context.Set<IdentityAccount>().SingleAsync(x => x.Id == account.Id);
+        context.Remove(persistedAccount);
         await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
     }
 
@@ -174,7 +176,9 @@ public sealed class RelationalProviderContractTests
                     null)));
         await context.SaveChangesAsync();
 
-        context.Remove(account);
+        context.ChangeTracker.Clear();
+        var persistedAccount = await context.Set<IdentityAccount>().SingleAsync(x => x.Id == account.Id);
+        context.Remove(persistedAccount);
         await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
     }
 
