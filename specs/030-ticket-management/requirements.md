@@ -1,6 +1,6 @@
 # 030 — Ticket Management: Requirements
 
-**Estado:** Implementing
+**Estado:** Completed
 **Fecha:** 7 de agosto de 2026
 **Aprobación:** Fast-track autorizado por el usuario para completar el showcase sin gates intermedios.
 **Dependencias:** `../020-departments-and-users/`

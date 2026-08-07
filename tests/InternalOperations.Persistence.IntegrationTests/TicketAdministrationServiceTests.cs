@@ -36,6 +36,8 @@ public sealed class TicketAdministrationServiceTests
         var loaded = await service.GetAsync(created.Value.Id, default);
         Assert.NotNull(loaded);
         Assert.Equal(created.Value.Id, loaded.Id);
+        var activity = Assert.Single(context.TicketActivities);
+        Assert.Equal(TicketActivityType.Created, activity.Type);
     }
 
     [Fact]
@@ -98,6 +100,8 @@ public sealed class TicketAdministrationServiceTests
             default);
         Assert.False(invalid.IsSuccess);
         Assert.Equal("tickets.invalid_transition", invalid.Error!.Code);
+        Assert.Contains(context.TicketActivities, activity => activity.Type == TicketActivityType.Updated);
+        Assert.Contains(context.TicketActivities, activity => activity.Type == TicketActivityType.StatusChanged);
     }
 
     [Fact]

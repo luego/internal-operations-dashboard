@@ -14,6 +14,7 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
     public DbSet<User> DomainUsers => Set<User>();
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<TicketComment> TicketComments => Set<TicketComment>();
+    public DbSet<TicketActivity> TicketActivities => Set<TicketActivity>();
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<RefreshTokenSessionEntity> RefreshTokenSessions => Set<RefreshTokenSessionEntity>();
 
@@ -106,7 +107,23 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
             entity.HasOne(x => x.Department).WithMany(x => x.Tickets).HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
         });
-        builder.Entity<TicketComment>().HasQueryFilter(x => !x.IsDeleted);
+        builder.Entity<TicketComment>(entity =>
+        {
+            entity.HasQueryFilter(x => !x.IsDeleted);
+            entity.Property(x => x.Comment).HasMaxLength(4000).IsRequired();
+            entity.HasIndex(x => new { x.TicketId, x.CreatedAtUtc, x.Id });
+            entity.HasOne(x => x.Ticket).WithMany().HasForeignKey(x => x.TicketId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+        });
+        builder.Entity<TicketActivity>(entity =>
+        {
+            entity.ToTable("TicketActivities");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Type).HasConversion<string>().HasMaxLength(30);
+            entity.Property(x => x.Description).HasMaxLength(500).IsRequired();
+            entity.HasIndex(x => new { x.TicketId, x.OccurredAtUtc, x.Id });
+            entity.HasOne(x => x.Ticket).WithMany().HasForeignKey(x => x.TicketId).OnDelete(DeleteBehavior.Restrict);
+        });
 
         builder.Entity<RefreshTokenSessionEntity>(entity =>
         {

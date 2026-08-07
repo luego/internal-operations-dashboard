@@ -8,7 +8,11 @@ The repository has completed **phase 1: application and persistence foundation**
 
 **Logical deletion** is completed. Business entities use `IsDeleted` so normal operations retain records instead of physically deleting them; the contract and migrations are verified on PostgreSQL and SQL Server.
 
-**Phase 3: departments and users** is implemented locally and remains the active increment while hosted PostgreSQL and SQL Server verification is pending. It provides authorized, paginated administration for departments and users, synchronized Identity/domain profiles, role and department assignment, activation/deactivation, refresh-session revocation, optimistic concurrency and provider-specific migrations.
+**Phase 3: departments and users** is completed. It provides authorized, paginated administration for departments and users, synchronized Identity/domain profiles, role and department assignment, activation/deactivation, refresh-session revocation, optimistic concurrency and provider-specific migrations verified on PostgreSQL and SQL Server.
+
+**Phase 4: ticket management** is completed. It provides authorized creation, retrieval, filtered pagination, updates and status transitions with database-generated numbers, optimistic concurrency and dual-provider migration contracts.
+
+**Phase 5: ticket comments and history** is implementing. The local vertical slice provides authenticated comments, paginated timelines and immutable activities for ticket creation, updates and status changes; hosted PostgreSQL and SQL Server verification is pending.
 
 ## Prerequisites
 
@@ -133,9 +137,15 @@ Shared <- stable technical primitives only
 - [Logical deletion requirements — Completed](specs/015-logical-deletion/requirements.md)
 - [Logical deletion design — Completed](specs/015-logical-deletion/design.md)
 - [Logical deletion tasks — Completed](specs/015-logical-deletion/tasks.md)
-- [Departments and users requirements — Implementing](specs/020-departments-and-users/requirements.md)
-- [Departments and users design — Implementing](specs/020-departments-and-users/design.md)
-- [Departments and users tasks and local evidence — Implementing](specs/020-departments-and-users/tasks.md)
+- [Departments and users requirements — Completed](specs/020-departments-and-users/requirements.md)
+- [Departments and users design — Completed](specs/020-departments-and-users/design.md)
+- [Departments and users tasks and evidence — Completed](specs/020-departments-and-users/tasks.md)
+- [Ticket management requirements — Completed](specs/030-ticket-management/requirements.md)
+- [Ticket management design — Completed](specs/030-ticket-management/design.md)
+- [Ticket management tasks and evidence — Completed](specs/030-ticket-management/tasks.md)
+- [Ticket comments and history requirements — Implementing](specs/040-ticket-comments-and-history/requirements.md)
+- [Ticket comments and history design — Implementing](specs/040-ticket-comments-and-history/design.md)
+- [Ticket comments and history tasks and evidence — Implementing](specs/040-ticket-comments-and-history/tasks.md)
 - [Architecture decision records](docs/adr/)
 
 Changes are developed from an approved feature spec. Requirements, design, tasks, tests and evidence must remain synchronized. Frontend work is outside the current backend scope.

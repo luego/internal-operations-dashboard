@@ -1,6 +1,6 @@
 # 020 — Departments and Users: Tasks
 
-**Estado:** Implementing
+**Estado:** Completed
 **Fecha:** 7 de agosto de 2026
 **Aprobación:** Aprobada explícitamente por el usuario el 7 de agosto de 2026.
 **Requisitos:** `requirements.md`
@@ -164,16 +164,16 @@
 - build Release con `ContinuousIntegrationBuild=true`: 0 warnings, 0 errores.
 - regresión local sin provider matrix: Application 37, Domain 17, Architecture 10, API 27 y Persistence 17; 108 pruebas aprobadas, 0 fallos, 0 skips.
 - `dotnet ef migrations has-pending-model-changes` para PostgreSQL y SQL Server: sin cambios pendientes.
-- Contrato de Users para providers compila, pero `TASK-DU-019..020` permanece abierto hasta ejecutar PostgreSQL y SQL Server reales después de publicar el lote.
+- Provider matrix alojada: run `31224821985`, Foundation, PostgreSQL y SQL Server en `success`; contratos reales de Departments/Users ejecutados sin fallos ni skips.
 
 ## Ola 6 — Provider matrix
 
-- [ ] **TASK-DU-019 Ampliar contrato real de Departments**
+- [x] **TASK-DU-019 Ampliar contrato real de Departments**
   - Requisitos: `REQ-DEP-*`, `REQ-DU-NF-006`.
   - Misma prueba en PostgreSQL y SQL Server.
   - `TEST-PROV-DEP-001..006`: unicidad, longitudes, queries, concurrency, restrict y UTC.
 
-- [ ] **TASK-DU-020 Ampliar contrato real de Users**
+- [x] **TASK-DU-020 Ampliar contrato real de Users**
   - Requisitos: `REQ-USR-*`, `REQ-DU-NF-006`.
   - Misma prueba en PostgreSQL y SQL Server.
   - `TEST-PROV-USR-001..008`: atomic create, rollback, shared PK, assignment, status/revoke, concurrency, queries y last-admin race.
@@ -181,12 +181,12 @@
 
 ## Ola 7 — Calidad y cierre
 
-- [ ] **TASK-DU-021 Auditoría de seguridad y arquitectura**
+- [x] **TASK-DU-021 Auditoría de seguridad y arquitectura**
   - Buscar mass assignment, exposición de Identity/PII, passwords/tokens/stamps en logs, strings de roles, bypass de policy y puertos contaminados.
   - Auditar dependencias y paquetes.
   - Hallazgos aceptados requieren riesgo, owner y fecha.
 
-- [ ] **TASK-DU-022 Ejecutar gates equivalentes a CI**
+- [x] **TASK-DU-022 Ejecutar gates equivalentes a CI**
   - tool restore;
   - restore locked;
   - format verify;
@@ -196,12 +196,12 @@
   - SQL Server provider contracts.
   - El baseline exige los 58 tests actuales más toda prueba 020.
 
-- [ ] **TASK-DU-023 Sincronizar documentación y evidencia**
+- [x] **TASK-DU-023 Sincronizar documentación y evidencia**
   - Actualizar README, OpenAPI, specs y runbook de migración.
   - Registrar resultados reales sin confundir local, commit, push y hosted CI.
   - Confirmar diff limpio y trazabilidad bidireccional.
 
-- [ ] **GATE-DU-999 Completar la spec**
+- [x] **GATE-DU-999 Completar la spec**
   - Todos los requisitos/tareas tienen evidencia reproducible.
   - Ambos providers cumplen el mismo contrato.
   - OpenAPI coincide con HTTP observado.

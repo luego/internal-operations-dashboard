@@ -5,6 +5,7 @@ using InternalOperations.Application.Abstractions.Authentication;
 using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Application.Features.Auth;
 using InternalOperations.Application.Features.Departments;
+using InternalOperations.Application.Features.TicketCollaboration;
 using InternalOperations.Application.Features.Tickets;
 using InternalOperations.Domain.Departments;
 using InternalOperations.Domain.Tickets;
@@ -224,7 +225,24 @@ public sealed class RelationalProviderContractTests
     {
         await using var context = createContext();
         var department = Department.Create("Ticket provider contract", null, now.UtcDateTime);
+        var authorId = Guid.NewGuid();
         context.Departments.Add(department);
+        context.Users.Add(new IdentityAccount
+        {
+            Id = authorId,
+            UserName = "ticket-provider-agent",
+            NormalizedUserName = "TICKET-PROVIDER-AGENT",
+            Email = "ticket-provider-agent@example.test",
+            NormalizedEmail = "TICKET-PROVIDER-AGENT@EXAMPLE.TEST",
+            DisplayName = "Ticket Provider Agent",
+            IsActive = true,
+        });
+        context.DomainUsers.Add(User.Create(
+            authorId,
+            "ticket-provider-agent",
+            "Ticket Provider Agent",
+            null,
+            now.UtcDateTime));
         await context.SaveChangesAsync();
         var service = new TicketAdministrationService(context, new FixedClock(now));
 
@@ -271,6 +289,21 @@ public sealed class RelationalProviderContractTests
             new ChangeTicketStatusCommand(updated.Value!.Id, TicketStatus.InProgress, updated.Value.Version),
             default);
         Assert.True(transitioned.IsSuccess);
+
+        var collaboration = new TicketCollaborationService(context, new FixedClock(now.AddMinutes(1)));
+        var comment = await collaboration.AddCommentAsync(
+            transitioned.Value!.Id,
+            authorId,
+            "Provider contract comment",
+            default);
+        Assert.True(comment.IsSuccess);
+        var comments = await collaboration.ListCommentsAsync(transitioned.Value.Id, 1, 25, default);
+        Assert.True(comments.IsSuccess);
+        Assert.Single(comments.Value!.Items);
+        var history = await collaboration.GetHistoryAsync(transitioned.Value.Id, 1, 25, default);
+        Assert.True(history.IsSuccess);
+        Assert.Equal(4, history.Value!.TotalCount);
+        Assert.Contains(history.Value.Items, item => item.Type == TicketActivityType.CommentAdded);
 
         context.ChangeTracker.Clear();
         await using var firstWriterContext = createContext();

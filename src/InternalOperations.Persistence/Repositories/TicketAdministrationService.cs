@@ -51,6 +51,7 @@ public sealed class TicketAdministrationService(ApplicationDbContext context, IC
         }
 
         Ticket ticket;
+        var now = clock.UtcNow.UtcDateTime;
         try
         {
             ticket = Ticket.Create(
@@ -59,7 +60,7 @@ public sealed class TicketAdministrationService(ApplicationDbContext context, IC
                 command.Priority,
                 command.DepartmentId,
                 command.UserId,
-                clock.UtcNow.UtcDateTime);
+                now);
         }
         catch (ArgumentException)
         {
@@ -67,6 +68,9 @@ public sealed class TicketAdministrationService(ApplicationDbContext context, IC
         }
 
         await context.Tickets.AddAsync(ticket, cancellationToken);
+        await context.TicketActivities.AddAsync(
+            TicketActivity.Create(ticket.Id, null, TicketActivityType.Created, "Ticket created", now),
+            cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         return Result<TicketDto>.Success(ToDto(
             ticket,
@@ -175,13 +179,25 @@ public sealed class TicketAdministrationService(ApplicationDbContext context, IC
 
         try
         {
+            var previousVersion = ticket.Version;
+            var now = clock.UtcNow.UtcDateTime;
             ticket.UpdateDetails(
                 command.Title,
                 command.Description,
                 command.Priority,
                 command.DepartmentId,
                 command.UserId,
-                clock.UtcNow.UtcDateTime);
+                now);
+            if (ticket.Version != previousVersion)
+            {
+                context.TicketActivities.Add(TicketActivity.Create(
+                    ticket.Id,
+                    null,
+                    TicketActivityType.Updated,
+                    "Ticket details updated",
+                    now));
+            }
+
             await context.SaveChangesAsync(cancellationToken);
         }
         catch (ArgumentException)
@@ -211,9 +227,22 @@ public sealed class TicketAdministrationService(ApplicationDbContext context, IC
             return Result<TicketDto>.Failure(TicketErrors.VersionConflict);
         }
 
-        if (!ticket.TryTransitionTo(command.Status, clock.UtcNow.UtcDateTime))
+        var previousStatus = ticket.Status;
+        var previousVersion = ticket.Version;
+        var now = clock.UtcNow.UtcDateTime;
+        if (!ticket.TryTransitionTo(command.Status, now))
         {
             return Result<TicketDto>.Failure(TicketErrors.InvalidTransition);
+        }
+
+        if (ticket.Version != previousVersion)
+        {
+            context.TicketActivities.Add(TicketActivity.Create(
+                ticket.Id,
+                null,
+                TicketActivityType.StatusChanged,
+                $"Status changed from {previousStatus} to {command.Status}",
+                now));
         }
 
         try

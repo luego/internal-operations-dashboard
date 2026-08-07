@@ -134,6 +134,38 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
                     b.ToTable("Tickets");
                 });
 
+            modelBuilder.Entity("InternalOperations.Domain.Tickets.TicketActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ActorUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TicketId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId", "OccurredAtUtc", "Id");
+
+                    b.ToTable("TicketActivities", (string)null);
+                });
+
             modelBuilder.Entity("InternalOperations.Domain.Tickets.TicketComment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -142,7 +174,8 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -161,9 +194,9 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TicketId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("TicketId", "CreatedAtUtc", "Id");
 
                     b.ToTable("TicketComments");
                 });
@@ -484,18 +517,29 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("InternalOperations.Domain.Tickets.TicketActivity", b =>
+                {
+                    b.HasOne("InternalOperations.Domain.Tickets.Ticket", "Ticket")
+                        .WithMany()
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
+                });
+
             modelBuilder.Entity("InternalOperations.Domain.Tickets.TicketComment", b =>
                 {
                     b.HasOne("InternalOperations.Domain.Tickets.Ticket", "Ticket")
                         .WithMany()
                         .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("InternalOperations.Domain.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Ticket");

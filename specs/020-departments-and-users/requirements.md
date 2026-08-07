@@ -1,6 +1,6 @@
 # 020 — Departments and Users: Requirements
 
-**Estado:** Implementing
+**Estado:** Completed
 **Fecha:** 7 de agosto de 2026
 **Aprobación:** Aprobada explícitamente por el usuario el 7 de agosto de 2026.
 **Basado en:** Fase 3 del documento maestro: Departamentos y usuarios
