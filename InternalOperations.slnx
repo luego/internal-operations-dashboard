@@ -15,5 +15,6 @@
     <Project Path="tests/InternalOperations.ArchitectureTests/InternalOperations.ArchitectureTests.csproj" />
     <Project Path="tests/InternalOperations.Domain.UnitTests/InternalOperations.Domain.UnitTests.csproj" />
     <Project Path="tests/InternalOperations.Persistence.IntegrationTests/InternalOperations.Persistence.IntegrationTests.csproj" />
+    <Project Path="tests/InternalOperations.ProviderContractTests/InternalOperations.ProviderContractTests.csproj" />
   </Folder>
 </Solution>

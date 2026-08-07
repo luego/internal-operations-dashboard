@@ -50,6 +50,7 @@ jobs:
           --configuration Release
           --no-build
           --no-restore
+          --filter "Category!=ProviderMatrix"
           --logger "trx;LogFilePrefix=foundation"
           --results-directory TestResults
 
@@ -58,6 +59,69 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: foundation-test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: error
+          retention-days: 14
+
+  provider-contracts:
+    name: Provider contracts (${{ matrix.provider }})
+    needs: foundation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        provider:
+          - PostgreSql
+          - SqlServer
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up .NET from global.json
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+
+      - name: Restore packages
+        run: dotnet restore InternalOperations.slnx --locked-mode
+
+      - name: Build provider contracts
+        run: >-
+          dotnet build
+          tests/InternalOperations.ProviderContractTests/InternalOperations.ProviderContractTests.csproj
+          --configuration Release
+          --no-restore
+          -p:ContinuousIntegrationBuild=true
+
+      - name: Run ${{ matrix.provider }} contracts
+        run: >-
+          dotnet test
+          tests/InternalOperations.ProviderContractTests/InternalOperations.ProviderContractTests.csproj
+          --configuration Release
+          --no-build
+          --no-restore
+          --filter "Category=ProviderMatrix&Provider=${{ matrix.provider }}"
+          --logger "trx;LogFileName=provider-${{ matrix.provider }}.trx"
+          --results-directory TestResults
+
+      - name: Verify provider test selection
+        run: >-
+          python3 -c "import glob, xml.etree.ElementTree as ET;
+          files = glob.glob('TestResults/*.trx');
+          assert files, 'Provider TRX was not created';
+          total = sum(len(ET.parse(path).getroot().findall('.//{*}UnitTestResult')) for path in files);
+          assert total >= 1, 'Provider filter selected no tests'"
+
+      - name: Upload provider contract results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: provider-contract-results-${{ matrix.provider }}
           path: TestResults/**/*.trx
           if-no-files-found: error
           retention-days: 14

@@ -11,7 +11,7 @@ The repository has completed **phase 1: application and persistence foundation**
 - .NET SDK compatible with `global.json` (`10.0.3xx`; latest patch)
 - Git
 
-Docker, PostgreSQL and SQL Server are not required to build or run the automated tests. Running the API against a real database requires either PostgreSQL or SQL Server and the corresponding `Database` configuration.
+Docker, PostgreSQL and SQL Server are not required to build or run the fast foundation suite. Docker is required for the provider-contract suite, which starts disposable PostgreSQL and SQL Server containers through Testcontainers without storing database credentials in the repository. Running the API against a persistent database requires either PostgreSQL or SQL Server and the corresponding `Database` configuration.
 
 ## Validate the backend
 
@@ -22,10 +22,20 @@ dotnet tool restore
 dotnet restore InternalOperations.slnx --locked-mode
 dotnet format InternalOperations.slnx --verify-no-changes --no-restore
 dotnet build InternalOperations.slnx --configuration Release --no-restore -p:ContinuousIntegrationBuild=true
-dotnet test InternalOperations.slnx --configuration Release --no-build --no-restore
+dotnet test InternalOperations.slnx --configuration Release --no-build --no-restore --filter "Category!=ProviderMatrix"
 ```
 
 The build treats warnings as errors under the CI flag. The architecture suite verifies both assembly dependencies and exact project-reference boundaries.
+
+With a working Docker daemon, execute the real relational provider matrix separately:
+
+```bash
+dotnet test tests/InternalOperations.ProviderContractTests \
+  --configuration Release \
+  --filter "Category=ProviderMatrix"
+```
+
+The provider contracts apply the complete migration history, verify unique refresh-token hashes, restrictive account relationships, optimistic concurrency, rollback and reapplication independently on PostgreSQL and SQL Server. GitHub Actions runs both providers as an explicit matrix after the foundation job succeeds.
 
 ## Development authentication seed
 
@@ -88,7 +98,8 @@ tests/
 ├── InternalOperations.Application.UnitTests
 ├── InternalOperations.ArchitectureTests
 ├── InternalOperations.Domain.UnitTests
-└── InternalOperations.Persistence.IntegrationTests
+├── InternalOperations.Persistence.IntegrationTests
+└── InternalOperations.ProviderContractTests
 ```
 
 Production dependencies point toward the core:

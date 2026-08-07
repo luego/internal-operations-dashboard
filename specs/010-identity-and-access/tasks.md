@@ -172,7 +172,8 @@
 - Auditoría NuGet: ningún paquete vulnerable detectado mediante `dotnet list InternalOperations.slnx package --vulnerable --include-transitive`.
 - Revisión de seguridad: sin secretos de autenticación versionados, sin refresh tokens persistidos en plaintext, algoritmo JWT fijado, límites aprobados validados y fronteras Domain/Application protegidas por los `10` architecture tests.
 - Migraciones: `InitialIdentityAndAccess` existe en assemblies separados para PostgreSQL y SQL Server; ambos snapshots están sincronizados (`dotnet ef migrations has-pending-model-changes`) y generan scripts idempotentes de `321` y `354` líneas respectivamente.
-- Pendiente reproducible: no hubo ejecución real sobre PostgreSQL/SQL Server. Docker CLI está presente, pero el daemon no está disponible en este host; por eso `TASK-SEC-012` y las tareas que requieren contrato real de providers siguen abiertas.
+- Matriz preparada: `InternalOperations.ProviderContractTests` y el job `provider-contracts` de GitHub Actions ejecutan migración, unicidad del hash de refresh, relaciones restrictivas, concurrencia optimista, rollback y reaplicación por separado para PostgreSQL y SQL Server mediante Testcontainers, sin credenciales versionadas.
+- Pendiente reproducible: el código de la matriz compila localmente, pero no hubo ejecución relacional porque el daemon Docker no está disponible en este host y este commit aún no se ha publicado por decisión del usuario. `TASK-SEC-011`, `TASK-SEC-012` y cualquier tarea que requiera evidencia real permanecen abiertas hasta observar ambos jobs alojados.
 
 ## Salida esperada
 
