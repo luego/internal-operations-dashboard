@@ -159,6 +159,7 @@
 
 ## Evidencia del checkpoint de implementación
 
+- Iteración de migraciones dual-provider aprobada por el usuario el 7 de agosto de 2026; la aprobación acepta el checkpoint implementado, pero no sustituye la evidencia pendiente sobre PostgreSQL y SQL Server reales.
 - Restore locked: `dotnet restore InternalOperations.slnx --locked-mode` completó correctamente.
 - Formato: `dotnet format InternalOperations.slnx --verify-no-changes --no-restore` completó correctamente.
 - Build Release CI: compiló con `0` errores. Este host ARM reporta `NETSDK1188` para recursos localizados de paquetes de terceros; no se atribuyen al código, pero `TASK-SEC-014` permanece abierta porque el criterio exige `0` warnings.
@@ -169,7 +170,7 @@
   - Domain Unit: `1`.
   - Persistence Integration: `7`.
 - Auditoría NuGet: ningún paquete vulnerable detectado mediante `dotnet list InternalOperations.slnx package --vulnerable --include-transitive`.
-- Revisión de seguridad: sin secretos de autenticación versionados, sin refresh tokens persistidos en plaintext, algoritmo JWT fijado, límites aprobados validados y fronteras Domain/Application protegidas por los `8` architecture tests.
+- Revisión de seguridad: sin secretos de autenticación versionados, sin refresh tokens persistidos en plaintext, algoritmo JWT fijado, límites aprobados validados y fronteras Domain/Application protegidas por los `10` architecture tests.
 - Migraciones: `InitialIdentityAndAccess` existe en assemblies separados para PostgreSQL y SQL Server; ambos snapshots están sincronizados (`dotnet ef migrations has-pending-model-changes`) y generan scripts idempotentes de `321` y `354` líneas respectivamente.
 - Pendiente reproducible: no hubo ejecución real sobre PostgreSQL/SQL Server. Docker CLI está presente, pero el daemon no está disponible en este host; por eso `TASK-SEC-012` y las tareas que requieren contrato real de providers siguen abiertas.
 
