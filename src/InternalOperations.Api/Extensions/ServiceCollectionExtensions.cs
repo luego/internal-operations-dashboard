@@ -6,12 +6,14 @@ using InternalOperations.Application.Abstractions.Authentication;
 using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Application.Abstractions.Services;
 using InternalOperations.Application.Common.Authorization;
+using InternalOperations.Application.Features.Departments;
 using InternalOperations.Application.Services;
 using InternalOperations.Infrastructure;
 using InternalOperations.Infrastructure.Authentication;
 using InternalOperations.Persistence;
 using InternalOperations.Persistence.Authentication;
 using InternalOperations.Persistence.Context;
+using InternalOperations.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -28,6 +30,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IClock, SystemClock>();
         services.AddScoped<ICurrentUser, CurrentUserAccessor>();
         services.AddScoped<ITicketService, TicketService>();
+        services.AddScoped<IRequestValidator<CreateDepartmentCommand>, CreateDepartmentCommandValidator>();
+        services.AddScoped<IRequestValidator<ListDepartmentsQuery>, ListDepartmentsQueryValidator>();
+        services.AddScoped<IRequestValidator<UpdateDepartmentCommand>, UpdateDepartmentCommandValidator>();
+        services.AddScoped<IRequestValidator<SetDepartmentStatusCommand>, SetDepartmentStatusCommandValidator>();
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
         return services;
@@ -63,6 +69,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IIdentityAuthenticationService, IdentityAuthenticationService>();
         services.AddScoped<IRefreshTokenSessionRepository, RefreshTokenSessionRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        services.AddScoped<IDepartmentReadService, DepartmentReadService>();
         services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
         return services;
     }

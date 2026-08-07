@@ -28,6 +28,27 @@ public sealed class AuthenticationContractTests : IClassFixture<WebApplicationFa
     }
 
     [Fact]
+    public async Task DepartmentAdministrationRequiresAuthentication()
+    {
+        var id = Guid.NewGuid();
+        var requests = new[]
+        {
+            await _client.GetAsync("/api/v1/departments"),
+            await _client.PostAsJsonAsync("/api/v1/departments", new { name = "Operations" }),
+            await _client.GetAsync($"/api/v1/departments/{id}"),
+            await _client.PutAsJsonAsync($"/api/v1/departments/{id}", new { name = "Operations", version = Guid.NewGuid() }),
+            await _client.PatchAsJsonAsync($"/api/v1/departments/{id}/status", new { isActive = false, version = Guid.NewGuid() }),
+        };
+
+        foreach (var response in requests)
+        {
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+            var body = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+            Assert.Equal("auth.unauthenticated", body!["code"].ToString());
+        }
+    }
+
+    [Fact]
     public async Task InvalidLoginBodyUsesValidationProblemDetails()
     {
         var response = await _client.PostAsJsonAsync("/api/v1/auth/login", new { identifier = "", password = "" });

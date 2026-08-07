@@ -6,3 +6,4 @@ public interface IUnitOfWork
 }
 
 public sealed class PersistenceConcurrencyException : Exception;
+public sealed class PersistenceUniqueConstraintException : Exception;

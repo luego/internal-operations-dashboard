@@ -2,12 +2,15 @@ using System.Security.Cryptography;
 using System.Text;
 using InternalOperations.Application;
 using InternalOperations.Application.Abstractions.Authentication;
+using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Application.Features.Auth;
+using InternalOperations.Application.Features.Departments;
 using InternalOperations.Domain.Departments;
 using InternalOperations.Domain.Users;
 using InternalOperations.Persistence;
 using InternalOperations.Persistence.Authentication;
 using InternalOperations.Persistence.Context;
+using InternalOperations.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -91,6 +94,7 @@ public sealed class RelationalProviderContractTests
         }
 
         await AssertUniqueTokenHashAsync(createContext, userId, tokenHash, now);
+        await AssertDepartmentFoundationAsync(createContext);
         await AssertLogicalDeletionAsync(createContext);
         await AssertAuthenticationAndLockoutAsync(services);
         await AssertHandlerSessionContractAsync(services, now);
@@ -102,9 +106,72 @@ public sealed class RelationalProviderContractTests
         await AssertRollbackAndReapplyAsync(createContext);
     }
 
+    private static async Task AssertDepartmentFoundationAsync(Func<ApplicationDbContext> createContext)
+    {
+        var createdAtUtc = new DateTime(2026, 8, 7, 18, 0, 0, DateTimeKind.Utc);
+        var original = Department.Create(" Provider  Operations ", "Provider contract", createdAtUtc);
+        await using (var context = createContext())
+        {
+            await new DepartmentRepository(context).AddAsync(original, default);
+            await new UnitOfWork(context).SaveChangesAsync();
+        }
+
+        await using (var context = createContext())
+        {
+            var duplicate = Department.Create("provider operations", null, createdAtUtc);
+            await new DepartmentRepository(context).AddAsync(duplicate, default);
+            await Assert.ThrowsAsync<PersistenceUniqueConstraintException>(
+                () => new UnitOfWork(context).SaveChangesAsync());
+        }
+
+        await using (var context = createContext())
+        {
+            var projected = await new DepartmentReadService(context).GetAsync(original.Id, default);
+            Assert.NotNull(projected);
+            Assert.Equal("Provider Operations", projected.Name);
+            Assert.Equal(createdAtUtc, projected.CreatedAtUtc);
+
+            var page = await new DepartmentReadService(context).ListAsync(
+                new DepartmentListFilter(1, 25, "provider", true, "name", "asc"),
+                default);
+            Assert.Contains(page.Items, item => item.Id == original.Id);
+        }
+
+        await using (var firstContext = createContext())
+        await using (var secondContext = createContext())
+        {
+            var first = await firstContext.Departments.SingleAsync(x => x.Id == original.Id);
+            var stale = await secondContext.Departments.SingleAsync(x => x.Id == original.Id);
+            first.Update("Provider Customer Operations", "First writer", createdAtUtc.AddMinutes(1));
+            await new UnitOfWork(firstContext).SaveChangesAsync();
+
+            stale.Update("Provider Service Operations", "Stale writer", createdAtUtc.AddMinutes(2));
+            await Assert.ThrowsAsync<PersistenceConcurrencyException>(
+                () => new UnitOfWork(secondContext).SaveChangesAsync());
+        }
+
+        await using (var context = createContext())
+        {
+            var tracked = await context.Departments.SingleAsync(x => x.Id == original.Id);
+            tracked.Deactivate(createdAtUtc.AddMinutes(3));
+            await new UnitOfWork(context).SaveChangesAsync();
+            Assert.False(tracked.IsActive);
+            Assert.NotEqual(original.Version, tracked.Version);
+
+            context.Remove(tracked);
+            await context.SaveChangesAsync();
+        }
+
+        await using (var context = createContext())
+        {
+            context.Departments.Add(Department.Create("Provider Customer Operations", "Reused after logical deletion", createdAtUtc));
+            await context.SaveChangesAsync();
+        }
+    }
+
     private static async Task AssertLogicalDeletionAsync(Func<ApplicationDbContext> createContext)
     {
-        var department = new Department { Name = "Logical deletion contract" };
+        var department = Department.Create("Logical deletion contract", null);
         await using (var context = createContext())
         {
             context.Departments.Add(department);

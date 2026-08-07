@@ -29,7 +29,23 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
         builder.Entity<IdentityRoleClaim<Guid>>().ToTable("IdentityRoleClaims");
         builder.Entity<IdentityUserToken<Guid>>().ToTable("IdentityUserTokens");
         builder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
-        builder.Entity<Department>().HasQueryFilter(x => !x.IsDeleted);
+        builder.Entity<Department>(entity =>
+        {
+            entity.HasQueryFilter(x => !x.IsDeleted);
+            entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.NormalizedName).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.Version).IsConcurrencyToken();
+            var nameIndex = entity.HasIndex(x => x.NormalizedName).IsUnique();
+            if (Database.IsNpgsql())
+            {
+                nameIndex.HasFilter("\"IsDeleted\" = FALSE");
+            }
+            else if (Database.IsSqlServer())
+            {
+                nameIndex.HasFilter("[IsDeleted] = 0");
+            }
+        });
         builder.Entity<Ticket>().HasQueryFilter(x => !x.IsDeleted);
         builder.Entity<TicketComment>().HasQueryFilter(x => !x.IsDeleted);
         builder.Entity<User>()

@@ -12,7 +12,7 @@ public sealed class LogicalDeletionPersistenceTests
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        var department = new Department { Name = "Operations" };
+        var department = Department.Create("Operations", null);
 
         await using (var context = new ApplicationDbContext(options))
         {

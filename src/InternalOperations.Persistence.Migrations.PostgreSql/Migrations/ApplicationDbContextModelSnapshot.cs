@@ -33,7 +33,8 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -43,14 +44,28 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Departments");
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = FALSE");
+
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("InternalOperations.Domain.Tickets.Ticket", b =>
@@ -101,7 +116,7 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tickets");
+                    b.ToTable("Tickets", (string)null);
                 });
 
             modelBuilder.Entity("InternalOperations.Domain.Tickets.TicketComment", b =>
@@ -135,7 +150,7 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TicketComments");
+                    b.ToTable("TicketComments", (string)null);
                 });
 
             modelBuilder.Entity("InternalOperations.Domain.Users.User", b =>
@@ -170,7 +185,7 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("InternalOperations.Persistence.Authentication.IdentityAccount", b =>
@@ -430,7 +445,7 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
             modelBuilder.Entity("InternalOperations.Domain.Tickets.Ticket", b =>
                 {
                     b.HasOne("InternalOperations.Domain.Departments.Department", "Department")
-                        .WithMany()
+                        .WithMany("Tickets")
                         .HasForeignKey("DepartmentId");
 
                     b.HasOne("InternalOperations.Domain.Users.User", "User")
@@ -464,7 +479,7 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
             modelBuilder.Entity("InternalOperations.Domain.Users.User", b =>
                 {
                     b.HasOne("InternalOperations.Domain.Departments.Department", "Department")
-                        .WithMany()
+                        .WithMany("Users")
                         .HasForeignKey("DepartmentId");
 
                     b.HasOne("InternalOperations.Persistence.Authentication.IdentityAccount", null)
@@ -536,6 +551,13 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("InternalOperations.Domain.Departments.Department", b =>
+                {
+                    b.Navigation("Tickets");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }
