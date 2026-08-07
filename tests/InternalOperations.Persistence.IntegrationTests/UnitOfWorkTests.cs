@@ -16,7 +16,12 @@ public sealed class UnitOfWorkTests
         await using var context = new TestApplicationDbContext(options);
         var unitOfWork = new UnitOfWork(context);
 
-        await context.Tickets.AddAsync(new Ticket { Title = "Alpha" });
+        await context.Tickets.AddAsync(Ticket.Create(
+            "Alpha",
+            "Unit of work persistence test",
+            TicketPriority.Medium,
+            Guid.NewGuid(),
+            null));
         await unitOfWork.SaveChangesAsync();
 
         var stored = await context.Tickets.SingleAsync();
