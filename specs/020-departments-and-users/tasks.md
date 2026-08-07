@@ -1,11 +1,12 @@
 # 020 — Departments and Users: Tasks
 
-**Estado:** Proposed
+**Estado:** Approved
 **Fecha:** 7 de agosto de 2026
+**Aprobación:** Aprobada explícitamente por el usuario el 7 de agosto de 2026.
 **Requisitos:** `requirements.md`
 **Diseño:** `design.md`
 **Dependencia:** `../010-identity-and-access/`
-**Gate de implementación:** pendiente de aprobación explícita
+**Gate de implementación:** requisitos, diseño y tareas aprobados; pendiente `GATE-DU-001`
 
 ## Convenciones
 
@@ -19,11 +20,12 @@
 
 ## Gate 0 — Aprobación y dependencias
 
-- [ ] **GATE-DU-000 Aprobar requirements, design y tasks**
+- [x] **GATE-DU-000 Aprobar requirements, design y tasks**
   - Resolver o aceptar las decisiones funcionales propuestas.
   - Reconciliar IDs `REQ-*`, `DES-*`, `TASK-*` y `TEST-*`.
   - Registrar aprobación explícita y fecha.
   - Cambiar los tres documentos de `Proposed` a `Approved` en un commit documental.
+  - Evidencia: aprobación explícita del usuario registrada el 7 de agosto de 2026.
 
 - [ ] **GATE-DU-001 Cerrar dependencia 010**
   - Publicar los commits locales de migraciones/provider matrix cuando el usuario lo autorice.

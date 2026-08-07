@@ -1,10 +1,11 @@
 # 020 — Departments and Users: Requirements
 
-**Estado:** Proposed
+**Estado:** Approved
 **Fecha:** 7 de agosto de 2026
+**Aprobación:** Aprobada explícitamente por el usuario el 7 de agosto de 2026.
 **Basado en:** Fase 3 del documento maestro: Departamentos y usuarios
 **Dependencia:** `../010-identity-and-access/`
-**Gate:** Pendiente de aprobación explícita del usuario.
+**Gate:** Requisitos aprobados; la implementación permanece sujeta a `GATE-DU-001`.
 
 ## 1. Objetivo
 

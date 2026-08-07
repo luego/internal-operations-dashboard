@@ -1,10 +1,11 @@
 # 020 — Departments and Users: Design
 
-**Estado:** Proposed
+**Estado:** Approved
 **Fecha:** 7 de agosto de 2026
+**Aprobación:** Aprobada explícitamente por el usuario el 7 de agosto de 2026.
 **Requisitos:** `requirements.md`
 **Dependencia:** `../010-identity-and-access/`
-**Gate:** Pendiente de aprobación explícita del usuario.
+**Gate:** Diseño aprobado; la implementación permanece sujeta a `GATE-DU-001`.
 
 ## 1. Resumen
 

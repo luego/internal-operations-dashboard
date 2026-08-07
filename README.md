@@ -6,7 +6,7 @@ The repository has completed **phase 1: application and persistence foundation**
 
 **Phase 2: identity and access** is now implementing. The current checkpoint includes ASP.NET Core Identity, JWT access tokens, rotating refresh sessions with replay-family revocation, role policies, secure Development seeding, authentication rate limits, OpenAPI bearer metadata and separate EF Core migrations for PostgreSQL and SQL Server. The real PostgreSQL/SQL Server contract matrix remains open before the phase can be marked completed.
 
-**Phase 3: departments and users** has a proposed specification under review. No phase 3 production code begins until the proposal is explicitly approved and the phase 2 provider matrix has been published and observed successfully, unless a documented waiver is approved.
+**Phase 3: departments and users** has an approved specification. Phase 3 production code remains blocked until the phase 2 provider matrix has been published and observed successfully, unless a documented waiver is approved.
 
 ## Prerequisites
 
@@ -128,9 +128,9 @@ Shared <- stable technical primitives only
 - [Identity and access requirements — Implementing](specs/010-identity-and-access/requirements.md)
 - [Identity and access design — Implementing](specs/010-identity-and-access/design.md)
 - [Identity and access tasks and evidence — Implementing](specs/010-identity-and-access/tasks.md)
-- [Departments and users requirements — Proposed](specs/020-departments-and-users/requirements.md)
-- [Departments and users design — Proposed](specs/020-departments-and-users/design.md)
-- [Departments and users tasks — Proposed](specs/020-departments-and-users/tasks.md)
+- [Departments and users requirements — Approved](specs/020-departments-and-users/requirements.md)
+- [Departments and users design — Approved](specs/020-departments-and-users/design.md)
+- [Departments and users tasks — Approved](specs/020-departments-and-users/tasks.md)
 - [Architecture decision records](docs/adr/)
 
 Changes are developed from an approved feature spec. Requirements, design, tasks, tests and evidence must remain synchronized. Frontend work is outside the current backend scope.
