@@ -4,7 +4,7 @@ Backend-first internal operations system for tickets, departments, users, commen
 
 The repository has completed **phase 1: application and persistence foundation**. It contains the project boundaries, cross-cutting application primitives, EF Core persistence adapters, dual-provider composition and a minimal ticket-creation endpoint that validates the vertical architecture.
 
-**Phase 2: identity and access** is now implementing. The current checkpoint includes ASP.NET Core Identity, JWT access tokens, rotating refresh sessions with replay-family revocation, role policies, secure Development seeding, authentication rate limits and OpenAPI bearer metadata. Provider-specific migrations and the real PostgreSQL/SQL Server contract matrix remain open before the phase can be marked completed.
+**Phase 2: identity and access** is now implementing. The current checkpoint includes ASP.NET Core Identity, JWT access tokens, rotating refresh sessions with replay-family revocation, role policies, secure Development seeding, authentication rate limits, OpenAPI bearer metadata and separate EF Core migrations for PostgreSQL and SQL Server. The real PostgreSQL/SQL Server contract matrix remains open before the phase can be marked completed.
 
 ## Prerequisites
 
@@ -43,6 +43,33 @@ dotnet user-secrets --project src/InternalOperations.Api set "Authentication:See
 
 Leave `Authentication:Seed:Enabled` unset or `false` when the seed is not required. Never use real account data or production credentials in these examples.
 
+## Database migrations
+
+Each provider has an independent migration assembly and design-time factory:
+
+- `InternalOperations.Persistence.Migrations.PostgreSql`
+- `InternalOperations.Persistence.Migrations.SqlServer`
+
+Restore the local `dotnet-ef` tool before inspecting or applying migrations. Supply real connection strings through environment variables or a secret manager; never commit them:
+
+```bash
+dotnet tool restore
+
+dotnet ef database update \
+  --project src/InternalOperations.Persistence.Migrations.PostgreSql \
+  --startup-project src/InternalOperations.Persistence.Migrations.PostgreSql \
+  --context ApplicationDbContext \
+  --connection "$POSTGRES_CONNECTION_STRING"
+
+dotnet ef database update \
+  --project src/InternalOperations.Persistence.Migrations.SqlServer \
+  --startup-project src/InternalOperations.Persistence.Migrations.SqlServer \
+  --context ApplicationDbContext \
+  --connection "$SQLSERVER_CONNECTION_STRING"
+```
+
+Generate and review migrations independently for both providers whenever the EF model changes. CI/local provider validation must start from empty databases and apply the complete history before running contract tests.
+
 ## Solution structure
 
 ```text
@@ -52,6 +79,8 @@ src/
 ├── InternalOperations.Domain
 ├── InternalOperations.Infrastructure
 ├── InternalOperations.Persistence
+├── InternalOperations.Persistence.Migrations.PostgreSql
+├── InternalOperations.Persistence.Migrations.SqlServer
 └── InternalOperations.Shared
 
 tests/
@@ -68,6 +97,7 @@ Production dependencies point toward the core:
 Api -> Application -> Domain
 Api -> Infrastructure -> Application
 Api -> Persistence -> Application + Domain
+Api -> provider migration assemblies -> Persistence
 Shared <- stable technical primitives only
 ```
 

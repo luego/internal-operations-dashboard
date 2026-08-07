@@ -162,15 +162,16 @@
 - Restore locked: `dotnet restore InternalOperations.slnx --locked-mode` completó correctamente.
 - Formato: `dotnet format InternalOperations.slnx --verify-no-changes --no-restore` completó correctamente.
 - Build Release CI: compiló con `0` errores. Este host ARM reporta `NETSDK1188` para recursos localizados de paquetes de terceros; no se atribuyen al código, pero `TASK-SEC-014` permanece abierta porque el criterio exige `0` warnings.
-- Suite local: `54/54` pruebas aprobadas, `0` fallos y `0` omitidas:
-  - API Integration: `22`.
+- Suite local: `58/58` pruebas aprobadas, `0` fallos y `0` omitidas:
+  - API Integration: `24`.
   - Application Unit: `16`.
-  - Architecture: `8`.
+  - Architecture: `10`.
   - Domain Unit: `1`.
   - Persistence Integration: `7`.
 - Auditoría NuGet: ningún paquete vulnerable detectado mediante `dotnet list InternalOperations.slnx package --vulnerable --include-transitive`.
 - Revisión de seguridad: sin secretos de autenticación versionados, sin refresh tokens persistidos en plaintext, algoritmo JWT fijado, límites aprobados validados y fronteras Domain/Application protegidas por los `8` architecture tests.
-- Pendiente reproducible: no hay migraciones EF separadas ni ejecución real sobre PostgreSQL/SQL Server. Docker CLI está presente, pero el daemon no está disponible en este host; por eso las tareas que requieren contrato real de providers y el estado global siguen abiertos.
+- Migraciones: `InitialIdentityAndAccess` existe en assemblies separados para PostgreSQL y SQL Server; ambos snapshots están sincronizados (`dotnet ef migrations has-pending-model-changes`) y generan scripts idempotentes de `321` y `354` líneas respectivamente.
+- Pendiente reproducible: no hubo ejecución real sobre PostgreSQL/SQL Server. Docker CLI está presente, pero el daemon no está disponible en este host; por eso `TASK-SEC-012` y las tareas que requieren contrato real de providers siguen abiertas.
 
 ## Salida esperada
 

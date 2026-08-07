@@ -5,6 +5,8 @@
     <Project Path="src/InternalOperations.Domain/InternalOperations.Domain.csproj" />
     <Project Path="src/InternalOperations.Infrastructure/InternalOperations.Infrastructure.csproj" />
     <Project Path="src/InternalOperations.Persistence/InternalOperations.Persistence.csproj" />
+    <Project Path="src/InternalOperations.Persistence.Migrations.PostgreSql/InternalOperations.Persistence.Migrations.PostgreSql.csproj" />
+    <Project Path="src/InternalOperations.Persistence.Migrations.SqlServer/InternalOperations.Persistence.Migrations.SqlServer.csproj" />
     <Project Path="src/InternalOperations.Shared/InternalOperations.Shared.csproj" />
   </Folder>
   <Folder Name="/tests/">

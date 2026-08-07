@@ -246,6 +246,20 @@
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )"
         }
       },
+      "internaloperations.persistence.migrations.postgresql": {
+        "type": "Project",
+        "dependencies": {
+          "InternalOperations.Persistence": "[1.0.0, )",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )"
+        }
+      },
+      "internaloperations.persistence.migrations.sqlserver": {
+        "type": "Project",
+        "dependencies": {
+          "InternalOperations.Persistence": "[1.0.0, )",
+          "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.10, )"
+        }
+      },
       "internaloperations.shared": {
         "type": "Project"
       },

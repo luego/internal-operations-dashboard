@@ -25,11 +25,21 @@ public sealed class ProjectDependencyTests
                 "src/InternalOperations.Domain/InternalOperations.Domain.csproj",
                 "src/InternalOperations.Shared/InternalOperations.Shared.csproj",
             ],
+            ["src/InternalOperations.Persistence.Migrations.PostgreSql/InternalOperations.Persistence.Migrations.PostgreSql.csproj"] =
+            [
+                "src/InternalOperations.Persistence/InternalOperations.Persistence.csproj",
+            ],
+            ["src/InternalOperations.Persistence.Migrations.SqlServer/InternalOperations.Persistence.Migrations.SqlServer.csproj"] =
+            [
+                "src/InternalOperations.Persistence/InternalOperations.Persistence.csproj",
+            ],
             ["src/InternalOperations.Api/InternalOperations.Api.csproj"] =
             [
                 "src/InternalOperations.Application/InternalOperations.Application.csproj",
                 "src/InternalOperations.Infrastructure/InternalOperations.Infrastructure.csproj",
                 "src/InternalOperations.Persistence/InternalOperations.Persistence.csproj",
+                "src/InternalOperations.Persistence.Migrations.PostgreSql/InternalOperations.Persistence.Migrations.PostgreSql.csproj",
+                "src/InternalOperations.Persistence.Migrations.SqlServer/InternalOperations.Persistence.Migrations.SqlServer.csproj",
                 "src/InternalOperations.Shared/InternalOperations.Shared.csproj",
             ],
         };

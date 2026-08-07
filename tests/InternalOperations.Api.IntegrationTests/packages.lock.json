@@ -647,6 +647,8 @@
           "InternalOperations.Application": "[1.0.0, )",
           "InternalOperations.Infrastructure": "[1.0.0, )",
           "InternalOperations.Persistence": "[1.0.0, )",
+          "InternalOperations.Persistence.Migrations.PostgreSql": "[1.0.0, )",
+          "InternalOperations.Persistence.Migrations.SqlServer": "[1.0.0, )",
           "InternalOperations.Shared": "[1.0.0, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.10, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.10, )",
@@ -684,6 +686,20 @@
           "Microsoft.EntityFrameworkCore": "[10.0.10, )",
           "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.10, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )"
+        }
+      },
+      "internaloperations.persistence.migrations.postgresql": {
+        "type": "Project",
+        "dependencies": {
+          "InternalOperations.Persistence": "[1.0.0, )",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.3, )"
+        }
+      },
+      "internaloperations.persistence.migrations.sqlserver": {
+        "type": "Project",
+        "dependencies": {
+          "InternalOperations.Persistence": "[1.0.0, )",
+          "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.10, )"
         }
       },
       "internaloperations.shared": {

@@ -40,9 +40,15 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddDbContext<ApplicationDbContext>(options =>
         {
-            if (provider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase)) options.UseNpgsql(connectionString);
+            if (provider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase))
+            {
+                options.UseNpgsql(connectionString, database => database.MigrationsAssembly(MigrationAssemblyNames.PostgreSql));
+            }
             else if (string.IsNullOrWhiteSpace(connectionString)) options.UseInMemoryDatabase("InternalOperations-Development");
-            else options.UseSqlServer(connectionString);
+            else
+            {
+                options.UseSqlServer(connectionString, database => database.MigrationsAssembly(MigrationAssemblyNames.SqlServer));
+            }
         });
         var lockout = configuration.GetSection("Authentication:Lockout").Get<AuthenticationLockoutOptions>() ?? new AuthenticationLockoutOptions();
         services.AddOptions<AuthenticationLockoutOptions>().Bind(configuration.GetSection("Authentication:Lockout"))
