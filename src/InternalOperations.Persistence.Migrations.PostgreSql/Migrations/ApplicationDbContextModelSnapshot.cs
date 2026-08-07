@@ -22,6 +22,8 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("TicketNumbers");
+
             modelBuilder.Entity("InternalOperations.Domain.Departments.Department", b =>
                 {
                     b.Property<Guid>("Id")
@@ -82,13 +84,16 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValueSql("nextval('\"TicketNumbers\"')");
 
                     b.Property<string>("Priority")
                         .IsRequired()
@@ -102,7 +107,8 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -110,11 +116,20 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("Number")
+                        .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("DepartmentId", "Status");
+
+                    b.HasIndex("UserId", "Status");
+
+                    b.HasIndex("Status", "Priority", "CreatedAtUtc");
 
                     b.ToTable("Tickets");
                 });
@@ -456,11 +471,13 @@ namespace InternalOperations.Persistence.Migrations.PostgreSql.Migrations
                 {
                     b.HasOne("InternalOperations.Domain.Departments.Department", "Department")
                         .WithMany("Tickets")
-                        .HasForeignKey("DepartmentId");
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("InternalOperations.Domain.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Department");
 

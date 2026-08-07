@@ -5,7 +5,9 @@ using InternalOperations.Application.Abstractions.Authentication;
 using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Application.Features.Auth;
 using InternalOperations.Application.Features.Departments;
+using InternalOperations.Application.Features.Tickets;
 using InternalOperations.Domain.Departments;
+using InternalOperations.Domain.Tickets;
 using InternalOperations.Domain.Users;
 using InternalOperations.Persistence;
 using InternalOperations.Persistence.Authentication;
@@ -97,6 +99,7 @@ public sealed class RelationalProviderContractTests
         await AssertUniqueTokenHashAsync(createContext, userId, tokenHash, now);
         await AssertDepartmentFoundationAsync(createContext);
         await AssertUserFoundationAsync(createContext);
+        await AssertTicketFoundationAsync(createContext, now);
         await AssertLogicalDeletionAsync(createContext);
         await AssertAuthenticationAndLockoutAsync(services);
         await AssertHandlerSessionContractAsync(services, now);
@@ -213,6 +216,40 @@ public sealed class RelationalProviderContractTests
         await firstContext.SaveChangesAsync();
         stale.UpdateProfile("user-foundation", "Stale Writer", DateTime.UtcNow.AddMinutes(2));
         await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => secondContext.SaveChangesAsync());
+    }
+
+    private static async Task AssertTicketFoundationAsync(
+        Func<ApplicationDbContext> createContext,
+        DateTimeOffset now)
+    {
+        await using var context = createContext();
+        var department = Department.Create("Ticket provider contract", null, now.UtcDateTime);
+        context.Departments.Add(department);
+        await context.SaveChangesAsync();
+        var service = new TicketAdministrationService(context, new FixedClock(now));
+
+        var first = await service.CreateAsync(
+            new CreateTicketCommand(
+                "Provider ticket one",
+                "Validates generated numbering.",
+                TicketPriority.High,
+                department.Id,
+                null),
+            default);
+        var second = await service.CreateAsync(
+            new CreateTicketCommand(
+                "Provider ticket two",
+                "Validates unique numbering.",
+                TicketPriority.Medium,
+                department.Id,
+                null),
+            default);
+
+        Assert.True(first.IsSuccess);
+        Assert.True(second.IsSuccess);
+        Assert.True(first.Value!.Number > 0);
+        Assert.True(second.Value!.Number > first.Value.Number);
+        Assert.Equal(first.Value.Id, (await service.GetAsync(first.Value.Id, default))!.Id);
     }
 
     private static async Task AssertLogicalDeletionAsync(Func<ApplicationDbContext> createContext)

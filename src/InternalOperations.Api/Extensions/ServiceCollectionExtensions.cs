@@ -7,6 +7,7 @@ using InternalOperations.Application.Abstractions.Persistence;
 using InternalOperations.Application.Abstractions.Services;
 using InternalOperations.Application.Common.Authorization;
 using InternalOperations.Application.Features.Departments;
+using InternalOperations.Application.Features.Tickets;
 using InternalOperations.Application.Features.Users;
 using InternalOperations.Application.Services;
 using InternalOperations.Infrastructure;
@@ -41,6 +42,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRequestValidator<SetUserDepartmentCommand>, SetUserDepartmentCommandValidator>();
         services.AddScoped<IRequestValidator<SetUserStatusCommand>, SetUserStatusCommandValidator>();
         services.AddScoped<IRequestValidator<SetUserRolesCommand>, SetUserRolesCommandValidator>();
+        services.AddScoped<IRequestValidator<CreateTicketCommand>, CreateTicketCommandValidator>();
         services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddSingleton<IAccessTokenIssuer, JwtAccessTokenIssuer>();
         return services;
@@ -79,6 +81,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IDepartmentReadService, DepartmentReadService>();
         services.AddScoped<IUserAdministrationService, UserAdministrationService>();
+        services.AddScoped<ITicketAdministrationService, TicketAdministrationService>();
         services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
         return services;
     }

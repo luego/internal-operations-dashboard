@@ -76,7 +76,36 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
                 nameIndex.HasFilter("[IsDeleted] = 0");
             }
         });
-        builder.Entity<Ticket>().HasQueryFilter(x => !x.IsDeleted);
+        builder.Entity<Ticket>(entity =>
+        {
+            entity.HasQueryFilter(x => !x.IsDeleted);
+            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(4000).IsRequired();
+            entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            entity.Property(x => x.Priority).HasConversion<string>().HasMaxLength(20);
+            entity.Property(x => x.Version).IsConcurrencyToken();
+            var number = entity.Property(x => x.Number).ValueGeneratedOnAdd();
+            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
+            {
+                number.HasValueGenerator<TicketNumberValueGenerator>();
+            }
+            else if (Database.IsNpgsql())
+            {
+                builder.HasSequence<int>("TicketNumbers").StartsAt(1);
+                number.HasDefaultValueSql("nextval('\"TicketNumbers\"')");
+            }
+            else if (Database.IsSqlServer())
+            {
+                builder.HasSequence<int>("TicketNumbers").StartsAt(1);
+                number.HasDefaultValueSql("NEXT VALUE FOR [TicketNumbers]");
+            }
+            entity.HasIndex(x => x.Number).IsUnique();
+            entity.HasIndex(x => new { x.Status, x.Priority, x.CreatedAtUtc });
+            entity.HasIndex(x => new { x.DepartmentId, x.Status });
+            entity.HasIndex(x => new { x.UserId, x.Status });
+            entity.HasOne(x => x.Department).WithMany(x => x.Tickets).HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+        });
         builder.Entity<TicketComment>().HasQueryFilter(x => !x.IsDeleted);
 
         builder.Entity<RefreshTokenSessionEntity>(entity =>
