@@ -3,6 +3,7 @@ using System.Text;
 using InternalOperations.Application;
 using InternalOperations.Application.Abstractions.Authentication;
 using InternalOperations.Application.Features.Auth;
+using InternalOperations.Domain.Departments;
 using InternalOperations.Domain.Users;
 using InternalOperations.Persistence;
 using InternalOperations.Persistence.Authentication;
@@ -90,6 +91,7 @@ public sealed class RelationalProviderContractTests
         }
 
         await AssertUniqueTokenHashAsync(createContext, userId, tokenHash, now);
+        await AssertLogicalDeletionAsync(createContext);
         await AssertAuthenticationAndLockoutAsync(services);
         await AssertHandlerSessionContractAsync(services, now);
         await AssertConcurrentRefreshAsync(services, now);
@@ -98,6 +100,25 @@ public sealed class RelationalProviderContractTests
         await AssertRestrictedDomainProfileDeletionAsync(createContext);
         await AssertRestrictedRefreshSessionDeletionAsync(createContext, now);
         await AssertRollbackAndReapplyAsync(createContext);
+    }
+
+    private static async Task AssertLogicalDeletionAsync(Func<ApplicationDbContext> createContext)
+    {
+        var department = new Department { Name = "Logical deletion contract" };
+        await using (var context = createContext())
+        {
+            context.Departments.Add(department);
+            await context.SaveChangesAsync();
+            context.Remove(department);
+            await context.SaveChangesAsync();
+        }
+
+        await using (var context = createContext())
+        {
+            Assert.False(await context.Departments.AnyAsync(x => x.Id == department.Id));
+            var persisted = await context.Departments.IgnoreQueryFilters().SingleAsync(x => x.Id == department.Id);
+            Assert.True(persisted.IsDeleted);
+        }
     }
 
     private static async Task AssertAuthenticationAndLockoutAsync(ServiceProvider services)

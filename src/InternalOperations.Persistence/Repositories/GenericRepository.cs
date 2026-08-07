@@ -66,7 +66,8 @@ public class GenericRepository<TEntity> : IRepository<TEntity>
 
     public void Remove(TEntity entity)
     {
-        Entities.Remove(entity);
+        entity.Delete();
+        Entities.Update(entity);
     }
 
     public async Task<IReadOnlyList<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
@@ -103,6 +104,10 @@ public class GenericRepository<TEntity> : IRepository<TEntity>
 
     public void RemoveRange(IEnumerable<TEntity> entities)
     {
-        Entities.RemoveRange(entities);
+        foreach (var entity in entities)
+        {
+            entity.Delete();
+            Entities.Update(entity);
+        }
     }
 }

@@ -45,6 +45,24 @@ public sealed class IdentityAuthenticationServiceTests
         Assert.Equal(inactive.Error, unknown.Error);
     }
 
+    [Fact]
+    public async Task DeletedAndUnknownAccountsReturnIdenticalPublicError()
+    {
+        await using var provider = Services();
+        await using var scope = provider.CreateAsyncScope();
+        var users = scope.ServiceProvider.GetRequiredService<UserManager<IdentityAccount>>();
+        var account = Account();
+        account.IsDeleted = true;
+        Assert.True((await users.CreateAsync(account, "Valid-password-123!")).Succeeded);
+        var service = new IdentityAuthenticationService(users);
+
+        var deleted = await service.AuthenticateAsync(account.UserName!, "Valid-password-123!", default);
+        var unknown = await service.AuthenticateAsync("unknown", "Valid-password-123!", default);
+
+        Assert.Equal("auth.invalid_credentials", deleted.Error!.Code);
+        Assert.Equal(deleted.Error, unknown.Error);
+    }
+
     private static ServiceProvider Services()
     {
         var services = new ServiceCollection();

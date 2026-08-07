@@ -6,6 +6,7 @@ namespace InternalOperations.Persistence.Authentication;
 public sealed class IdentityAccount : IdentityUser<Guid>
 {
     public bool IsActive { get; set; } = true;
+    public bool IsDeleted { get; set; }
     public string DisplayName { get; set; } = string.Empty;
 }
 

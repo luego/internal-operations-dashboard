@@ -41,7 +41,7 @@ public sealed class MigrationConfigurationTests
         Assert.Equal(expectedProvider, context.Database.ProviderName);
         Assert.Equal(expectedMigrationsAssembly, relationalOptions.MigrationsAssembly);
         var migrations = context.GetService<IMigrationsAssembly>().Migrations;
-        Assert.Single(migrations);
-        Assert.EndsWith("_InitialIdentityAndAccess", migrations.Keys.Single(), StringComparison.Ordinal);
+        Assert.Contains(migrations.Keys, migration => migration.EndsWith("_InitialIdentityAndAccess", StringComparison.Ordinal));
+        Assert.Contains(migrations.Keys, migration => migration.EndsWith("_AddLogicalDeletion", StringComparison.Ordinal));
     }
 }

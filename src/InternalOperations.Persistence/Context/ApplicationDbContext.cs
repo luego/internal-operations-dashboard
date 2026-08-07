@@ -1,3 +1,4 @@
+using InternalOperations.Domain.Common;
 using InternalOperations.Domain.Departments;
 using InternalOperations.Domain.Tickets;
 using InternalOperations.Domain.Users;
@@ -20,12 +21,17 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
     {
         base.OnModelCreating(builder);
         builder.Entity<IdentityAccount>().ToTable("IdentityUsers");
+        builder.Entity<IdentityAccount>().HasQueryFilter(x => !x.IsDeleted);
         builder.Entity<IdentityRole<Guid>>().ToTable("IdentityRoles");
         builder.Entity<IdentityUserRole<Guid>>().ToTable("IdentityUserRoles");
         builder.Entity<IdentityUserClaim<Guid>>().ToTable("IdentityUserClaims");
         builder.Entity<IdentityUserLogin<Guid>>().ToTable("IdentityUserLogins");
         builder.Entity<IdentityRoleClaim<Guid>>().ToTable("IdentityRoleClaims");
         builder.Entity<IdentityUserToken<Guid>>().ToTable("IdentityUserTokens");
+        builder.Entity<User>().HasQueryFilter(x => !x.IsDeleted);
+        builder.Entity<Department>().HasQueryFilter(x => !x.IsDeleted);
+        builder.Entity<Ticket>().HasQueryFilter(x => !x.IsDeleted);
+        builder.Entity<TicketComment>().HasQueryFilter(x => !x.IsDeleted);
         builder.Entity<User>()
             .HasOne<IdentityAccount>()
             .WithOne()
@@ -46,5 +52,35 @@ public class ApplicationDbContext(DbContextOptions options) : IdentityDbContext<
         });
         builder.Entity<Ticket>().Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
         builder.Entity<Ticket>().Property(e => e.Priority).HasConversion<string>().HasMaxLength(20);
+    }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ApplyLogicalDeletes();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        ApplyLogicalDeletes();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void ApplyLogicalDeletes()
+    {
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>().Where(x => x.State == EntityState.Deleted))
+        {
+            entry.Entity.Delete();
+            entry.State = EntityState.Modified;
+        }
+
+        foreach (var entry in ChangeTracker.Entries<IdentityAccount>().Where(x => x.State == EntityState.Deleted))
+        {
+            entry.Entity.IsDeleted = true;
+            entry.Entity.IsActive = false;
+            entry.State = EntityState.Modified;
+        }
     }
 }

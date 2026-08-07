@@ -11,7 +11,7 @@ public sealed class IdentityAuthenticationService(UserManager<IdentityAccount> u
     {
         var account = await FindAsync(identifier);
         if (account is null) return Invalid();
-        if (!account.IsActive || await users.IsLockedOutAsync(account)) return Invalid();
+        if (!account.IsActive || account.IsDeleted || await users.IsLockedOutAsync(account)) return Invalid();
         if (!await users.CheckPasswordAsync(account, password))
         {
             await users.AccessFailedAsync(account);
@@ -24,7 +24,7 @@ public sealed class IdentityAuthenticationService(UserManager<IdentityAccount> u
     public async Task<Result<AuthenticatedAccount>> GetActiveAccountAsync(Guid userId, CancellationToken cancellationToken)
     {
         var account = await users.FindByIdAsync(userId.ToString());
-        return account is null || !account.IsActive || await users.IsLockedOutAsync(account) ? Invalid() : await SuccessAsync(account);
+        return account is null || !account.IsActive || account.IsDeleted || await users.IsLockedOutAsync(account) ? Invalid() : await SuccessAsync(account);
     }
 
     private async Task<IdentityAccount?> FindAsync(string identifier)

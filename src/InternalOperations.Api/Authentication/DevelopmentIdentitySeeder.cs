@@ -34,9 +34,17 @@ public sealed class DevelopmentIdentitySeeder(IServiceProvider services, IHostEn
             account = new IdentityAccount { Id = id, UserName = seed.AdministratorIdentifier, Email = seed.AdministratorIdentifier.Contains('@', StringComparison.Ordinal) ? seed.AdministratorIdentifier : null, DisplayName = seed.AdministratorDisplayName, IsActive = true };
             Ensure(await users.CreateAsync(account, seed.AdministratorPassword));
         }
-        if (!await context.DomainUsers.AnyAsync(user => user.Id == account.Id, cancellationToken))
+        var profile = await context.DomainUsers
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(user => user.Id == account.Id, cancellationToken);
+        if (profile is null)
         {
             context.DomainUsers.Add(new User(account.Id, seed.AdministratorIdentifier, seed.AdministratorDisplayName));
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        else if (profile.IsDeleted)
+        {
+            profile.Restore();
             await context.SaveChangesAsync(cancellationToken);
         }
         if (!await users.IsInRoleAsync(account, ApplicationRoles.Administrator)) Ensure(await users.AddToRoleAsync(account, ApplicationRoles.Administrator));
