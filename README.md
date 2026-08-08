@@ -14,6 +14,8 @@ The repository has completed **phase 1: application and persistence foundation**
 
 **Phase 5: ticket comments and history** is implementing. The local vertical slice provides authenticated comments, paginated timelines and immutable activities for ticket creation, updates and status changes; hosted PostgreSQL and SQL Server verification is pending.
 
+**Phase 6: operations dashboard** is implementing. It provides authorized summary metrics and zero-filled daily trends for ticket creation and comments, with hosted PostgreSQL and SQL Server verification pending.
+
 ## Prerequisites
 
 - .NET SDK compatible with `global.json` (`10.0.3xx`; latest patch)
@@ -146,6 +148,9 @@ Shared <- stable technical primitives only
 - [Ticket comments and history requirements — Implementing](specs/040-ticket-comments-and-history/requirements.md)
 - [Ticket comments and history design — Implementing](specs/040-ticket-comments-and-history/design.md)
 - [Ticket comments and history tasks and evidence — Implementing](specs/040-ticket-comments-and-history/tasks.md)
+- [Operations dashboard requirements — Implementing](specs/050-operations-dashboard/requirements.md)
+- [Operations dashboard design — Implementing](specs/050-operations-dashboard/design.md)
+- [Operations dashboard tasks and evidence — Implementing](specs/050-operations-dashboard/tasks.md)
 - [Architecture decision records](docs/adr/)
 
 Changes are developed from an approved feature spec. Requirements, design, tasks, tests and evidence must remain synchronized. Frontend work is outside the current backend scope.

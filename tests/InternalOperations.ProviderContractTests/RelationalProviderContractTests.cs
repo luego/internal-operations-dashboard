@@ -305,6 +305,15 @@ public sealed class RelationalProviderContractTests
         Assert.Equal(4, history.Value!.TotalCount);
         Assert.Contains(history.Value.Items, item => item.Type == TicketActivityType.CommentAdded);
 
+        var dashboard = new DashboardQueryService(context, new FixedClock(now.AddMinutes(1)));
+        var summary = await dashboard.GetSummaryAsync(default);
+        var trends = await dashboard.GetTrendsAsync(1, default);
+        Assert.True(summary.TotalTickets >= 2);
+        Assert.True(summary.OpenTickets >= 1);
+        Assert.True(summary.InProgressTickets >= 1);
+        Assert.True(trends.Points.Sum(point => point.TicketsCreated) >= 2);
+        Assert.True(trends.Points.Sum(point => point.CommentsAdded) >= 1);
+
         context.ChangeTracker.Clear();
         await using var firstWriterContext = createContext();
         await using var staleWriterContext = createContext();
