@@ -16,7 +16,7 @@ The repository has completed **phase 1: application and persistence foundation**
 
 **Phase 6: operations dashboard** is completed. It provides authorized summary metrics and zero-filled daily trends for ticket creation and comments, verified on PostgreSQL and SQL Server.
 
-**Release readiness** is implementing. Structured liveness/readiness endpoints, container artifacts and an operations runbook are available; final hosted verification is pending.
+**Release readiness** is completed. Structured liveness/readiness endpoints, container artifacts, an operations runbook and the complete PostgreSQL/SQL Server provider matrix are verified.
 
 ## Prerequisites
 
@@ -162,9 +162,9 @@ Shared <- stable technical primitives only
 - [Operations dashboard requirements — Completed](specs/050-operations-dashboard/requirements.md)
 - [Operations dashboard design — Completed](specs/050-operations-dashboard/design.md)
 - [Operations dashboard tasks and evidence — Completed](specs/050-operations-dashboard/tasks.md)
-- [Release readiness requirements — Implementing](specs/060-release-readiness/requirements.md)
-- [Release readiness design — Implementing](specs/060-release-readiness/design.md)
-- [Release readiness tasks and evidence — Implementing](specs/060-release-readiness/tasks.md)
+- [Release readiness requirements — Completed](specs/060-release-readiness/requirements.md)
+- [Release readiness design — Completed](specs/060-release-readiness/design.md)
+- [Release readiness tasks and evidence — Completed](specs/060-release-readiness/tasks.md)
 - [Operations runbook](docs/operations-runbook.md)
 - [Architecture decision records](docs/adr/)
 
