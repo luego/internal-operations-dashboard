@@ -1,0 +1,37 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: internal_operations
+      POSTGRES_USER: internal_operations
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - internal-operations-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U internal_operations -d internal_operations"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Database__Provider: PostgreSql
+      ConnectionStrings__PostgreSql: Host=database;Port=5432;Database=internal_operations;Username=internal_operations;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      Authentication__Jwt__Issuer: ${JWT_ISSUER:?Set JWT_ISSUER}
+      Authentication__Jwt__Audience: ${JWT_AUDIENCE:?Set JWT_AUDIENCE}
+      Authentication__Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY}
+      Authentication__Seed__Enabled: "false"
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  internal-operations-postgres:

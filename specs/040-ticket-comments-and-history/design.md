@@ -1,6 +1,6 @@
 # 040 — Ticket Comments and History: Design
 
-**Estado:** Implementing
+**Estado:** Completed
 **Fecha:** 7 de agosto de 2026
 **Requisitos:** `requirements.md`
 

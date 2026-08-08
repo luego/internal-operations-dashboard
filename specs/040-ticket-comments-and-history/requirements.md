@@ -1,6 +1,6 @@
 # 040 — Ticket Comments and History: Requirements
 
-**Estado:** Implementing
+**Estado:** Completed
 **Fecha:** 7 de agosto de 2026
 **Aprobación:** Fast-track autorizado por el usuario para completar el showcase sin gates intermedios.
 **Dependencia:** `../030-ticket-management/`

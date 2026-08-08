@@ -1,8 +1,10 @@
 using InternalOperations.Api.Authentication;
 using InternalOperations.Api.ErrorHandling;
 using InternalOperations.Api.Extensions;
+using InternalOperations.Api.Health;
 using InternalOperations.Application.Mappings;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
@@ -61,6 +63,8 @@ builder.Services.AddOpenApi(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -95,6 +99,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false,
+    ResponseWriter = HealthResponseWriter.WriteAsync,
+}).AllowAnonymous();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("ready"),
+    ResponseWriter = HealthResponseWriter.WriteAsync,
+}).AllowAnonymous();
 app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 
 await app.Services.GetRequiredService<DevelopmentIdentitySeeder>().SeedAsync();

@@ -1,0 +1,12 @@
+**/.git
+**/.github
+**/.hermes
+**/bin
+**/obj
+**/TestResults
+**/*.user
+**/*.suo
+core.*
+.env
+.env.*
+!.env.example

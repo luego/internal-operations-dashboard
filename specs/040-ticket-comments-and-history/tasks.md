@@ -1,6 +1,6 @@
 # 040 — Ticket Comments and History: Tasks
 
-**Estado:** Implementing
+**Estado:** Completed
 **Fecha:** 7 de agosto de 2026
 **Modo:** Fast-track proporcional para showcase.
 
@@ -9,8 +9,8 @@
 - [x] **TASK-TCH-003** Implementar persistencia atómica y actividades de Ticket Management.
 - [x] **TASK-TCH-004** Publicar tres endpoints autorizados sin author controlado por cliente.
 - [x] **TASK-TCH-005** Añadir mappings, índices y migraciones dual-provider.
-- [ ] **TASK-TCH-006** Ampliar provider contract y ejecutar verificación completa.
-- [ ] **TASK-TCH-007** Sincronizar documentación y cerrar la spec.
+- [x] **TASK-TCH-006** Ampliar provider contract y ejecutar verificación completa.
+- [x] **TASK-TCH-007** Sincronizar documentación y cerrar la spec.
 
 ## Gate
 
@@ -22,4 +22,4 @@ La implementación continúa automáticamente por autorización fast-track. Los 
 - Regresión `Category!=ProviderMatrix`: 133/133 pruebas aprobadas (Application 44, Domain 24, Architecture 10, API 29, Persistence 26).
 - Build Release CI: 0 warnings, 0 errores.
 - Formato verificado y sin drift de modelo en PostgreSQL ni SQL Server.
-- El provider contract incluye comentarios, actividades y lectura histórica, pero su ejecución alojada real queda pendiente de publicación.
+- GitHub Actions run `31230805343`: Foundation, PostgreSQL y SQL Server completaron correctamente el contrato ampliado.

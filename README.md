@@ -12,9 +12,11 @@ The repository has completed **phase 1: application and persistence foundation**
 
 **Phase 4: ticket management** is completed. It provides authorized creation, retrieval, filtered pagination, updates and status transitions with database-generated numbers, optimistic concurrency and dual-provider migration contracts.
 
-**Phase 5: ticket comments and history** is implementing. The local vertical slice provides authenticated comments, paginated timelines and immutable activities for ticket creation, updates and status changes; hosted PostgreSQL and SQL Server verification is pending.
+**Phase 5: ticket comments and history** is completed. It provides authenticated comments, paginated timelines and immutable activities for ticket creation, updates and status changes, verified on PostgreSQL and SQL Server.
 
-**Phase 6: operations dashboard** is implementing. It provides authorized summary metrics and zero-filled daily trends for ticket creation and comments, with hosted PostgreSQL and SQL Server verification pending.
+**Phase 6: operations dashboard** is completed. It provides authorized summary metrics and zero-filled daily trends for ticket creation and comments, verified on PostgreSQL and SQL Server.
+
+**Release readiness** is implementing. Structured liveness/readiness endpoints, container artifacts and an operations runbook are available; final hosted verification is pending.
 
 ## Prerequisites
 
@@ -45,7 +47,16 @@ dotnet test tests/InternalOperations.ProviderContractTests \
   --filter "Category=ProviderMatrix"
 ```
 
-The provider contracts apply the complete migration history, verify unique refresh-token hashes, restrictive account relationships, optimistic concurrency, rollback and reapplication independently on PostgreSQL and SQL Server. GitHub Actions runs both providers as an explicit matrix after the foundation job succeeds.
+The provider contracts apply the complete migration history and verify authentication/session behavior, logical deletion, administration, tickets, comments/history, dashboard aggregation, relational constraints, optimistic concurrency, rollback and reapplication independently on PostgreSQL and SQL Server. GitHub Actions runs both providers as an explicit matrix after the foundation job succeeds.
+
+## Runtime health and container demo
+
+Anonymous health endpoints are available at:
+
+- `/health/live` — process liveness, with no external dependency.
+- `/health/ready` — readiness including database connectivity.
+
+A multi-stage `Dockerfile` and PostgreSQL `compose.yaml` are provided. Configuration, explicit migration, startup and troubleshooting commands are documented in the [operations runbook](docs/operations-runbook.md). Secrets must be supplied through environment variables and must not be committed.
 
 ## Development authentication seed
 
@@ -145,12 +156,16 @@ Shared <- stable technical primitives only
 - [Ticket management requirements — Completed](specs/030-ticket-management/requirements.md)
 - [Ticket management design — Completed](specs/030-ticket-management/design.md)
 - [Ticket management tasks and evidence — Completed](specs/030-ticket-management/tasks.md)
-- [Ticket comments and history requirements — Implementing](specs/040-ticket-comments-and-history/requirements.md)
-- [Ticket comments and history design — Implementing](specs/040-ticket-comments-and-history/design.md)
-- [Ticket comments and history tasks and evidence — Implementing](specs/040-ticket-comments-and-history/tasks.md)
-- [Operations dashboard requirements — Implementing](specs/050-operations-dashboard/requirements.md)
-- [Operations dashboard design — Implementing](specs/050-operations-dashboard/design.md)
-- [Operations dashboard tasks and evidence — Implementing](specs/050-operations-dashboard/tasks.md)
+- [Ticket comments and history requirements — Completed](specs/040-ticket-comments-and-history/requirements.md)
+- [Ticket comments and history design — Completed](specs/040-ticket-comments-and-history/design.md)
+- [Ticket comments and history tasks and evidence — Completed](specs/040-ticket-comments-and-history/tasks.md)
+- [Operations dashboard requirements — Completed](specs/050-operations-dashboard/requirements.md)
+- [Operations dashboard design — Completed](specs/050-operations-dashboard/design.md)
+- [Operations dashboard tasks and evidence — Completed](specs/050-operations-dashboard/tasks.md)
+- [Release readiness requirements — Implementing](specs/060-release-readiness/requirements.md)
+- [Release readiness design — Implementing](specs/060-release-readiness/design.md)
+- [Release readiness tasks and evidence — Implementing](specs/060-release-readiness/tasks.md)
+- [Operations runbook](docs/operations-runbook.md)
 - [Architecture decision records](docs/adr/)
 
 Changes are developed from an approved feature spec. Requirements, design, tasks, tests and evidence must remain synchronized. Frontend work is outside the current backend scope.
