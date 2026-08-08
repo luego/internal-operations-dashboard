@@ -47,13 +47,14 @@ public sealed class TicketCollaborationServiceTests
         var ticket = Ticket.Create("Printer outage", "Cannot print", TicketPriority.Medium, department.Id, null, Now.UtcDateTime);
         context.AddRange(department, author, ticket);
         await context.SaveChangesAsync();
-        var service = new TicketCollaborationService(context, new FixedClock());
+        var firstWriter = new TicketCollaborationService(context, new FixedClock());
+        var secondWriter = new TicketCollaborationService(context, new FixedClock(Now.AddSeconds(1)));
 
-        await service.AddCommentAsync(ticket.Id, author.Id, "First", default);
-        await service.AddCommentAsync(ticket.Id, author.Id, "Second", default);
+        await firstWriter.AddCommentAsync(ticket.Id, author.Id, "First", default);
+        await secondWriter.AddCommentAsync(ticket.Id, author.Id, "Second", default);
 
-        var comments = await service.ListCommentsAsync(ticket.Id, 1, 1, default);
-        var history = await service.GetHistoryAsync(ticket.Id, 1, 10, default);
+        var comments = await firstWriter.ListCommentsAsync(ticket.Id, 1, 1, default);
+        var history = await firstWriter.GetHistoryAsync(ticket.Id, 1, 10, default);
 
         Assert.True(comments.IsSuccess);
         Assert.Equal(2, comments.Value!.TotalCount);
@@ -111,8 +112,8 @@ public sealed class TicketCollaborationServiceTests
         return new ApplicationDbContext(options);
     }
 
-    private sealed class FixedClock : IClock
+    private sealed class FixedClock(DateTimeOffset? value = null) : IClock
     {
-        public DateTimeOffset UtcNow => Now;
+        public DateTimeOffset UtcNow => value ?? Now;
     }
 }
