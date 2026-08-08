@@ -18,12 +18,202 @@ The repository has completed **phase 1: application and persistence foundation**
 
 **Release readiness** is completed. Structured liveness/readiness endpoints, container artifacts, an operations runbook and the complete PostgreSQL/SQL Server provider matrix are verified.
 
+**Frontend phase 1** is implemented. Next.js provides a responsive landing page, secure BFF login with HttpOnly access/refresh cookies, automatic refresh rotation, protected dashboard routing and live dashboard metrics. The remaining frontend phases add ticket and administration workflows.
+
 ## Prerequisites
 
 - .NET SDK compatible with `global.json` (`10.0.3xx`; latest patch)
 - Git
 
 Docker, PostgreSQL and SQL Server are not required to build or run the fast foundation suite. Docker is required for the provider-contract suite, which starts disposable PostgreSQL and SQL Server containers through Testcontainers without storing database credentials in the repository. Running the API against a persistent database requires either PostgreSQL or SQL Server and the corresponding `Database` configuration.
+
+## One-command full-stack showcase
+
+This is the quickest way to test the complete flow on Apple Silicon. It requires only Git and Docker Desktop; .NET and Node.js run inside Linux ARM64-compatible containers.
+
+```bash
+git clone https://github.com/luego/internal-operations-dashboard.git
+cd internal-operations-dashboard
+chmod +x scripts/start-showcase.sh
+./scripts/start-showcase.sh
+```
+
+The installer asks interactively for:
+
+- the administrator email (or accepts `admin@opsdesk.local`);
+- a PostgreSQL password and confirmation;
+- an administrator login password and confirmation.
+
+Input is hidden. The script validates strong passwords and generates the JWT signing key automatically. It stores them in the local `.env.showcase` file with mode `600`; that file is ignored by Git, is never preconfigured or versioned, and lets Docker Compose resume the existing stack without asking for credentials again. All published ports bind to `127.0.0.1` because local HTTP cookies are intentionally non-secure.
+
+The stack builds and starts in dependency order:
+
+```text
+PostgreSQL 17 -> EF Core migrator -> .NET 10 API -> Next.js frontend
+```
+
+After the readiness checks pass:
+
+- Frontend and login: <http://localhost:3000>
+- API readiness: <http://localhost:8080/health/ready>
+- API liveness: <http://localhost:8080/health/live>
+
+Use the administrator email and password entered during installation. The Development seed is idempotent and exists only for this local showcase configuration.
+
+### Stop, resume or reset
+
+Keep the database and resume without entering passwords again:
+
+```bash
+docker compose --env-file .env.showcase stop
+docker compose --env-file .env.showcase start
+```
+
+Inspect status and logs:
+
+```bash
+docker compose --env-file .env.showcase ps
+docker compose --env-file .env.showcase logs -f frontend api migrator database
+```
+
+Remove containers and all PostgreSQL data, then enter fresh credentials:
+
+```bash
+./scripts/start-showcase.sh --reset
+```
+
+`--reset` is destructive and is intended only for disposable showcase data. If ports `3000`, `8080` or `5432` are occupied, set `FRONTEND_PORT`, `API_PORT` or `POSTGRES_PORT` before running the script.
+
+## Apple Silicon development setup with PostgreSQL
+
+This is the recommended local workflow for an Apple Silicon Mac. PostgreSQL runs in Docker while the API runs from the host with the .NET SDK, which keeps migrations, logs and debugging straightforward.
+
+### 1. Clone and restore
+
+```bash
+git clone https://github.com/luego/internal-operations-dashboard.git
+cd internal-operations-dashboard
+git checkout main
+git pull origin main
+
+dotnet --version
+docker version
+dotnet tool restore
+dotnet restore InternalOperations.slnx --locked-mode
+```
+
+The SDK selected by `global.json` must be available (`10.0.3xx`, latest compatible patch), and Docker Desktop must be running.
+
+### 2. Configure the local PostgreSQL password
+
+Use a development-only value and never commit it:
+
+```bash
+export POSTGRES_PASSWORD='<strong-local-postgres-password>'
+```
+
+### 3. Start PostgreSQL
+
+`postgres:17-alpine` works through Docker Desktop on Apple Silicon. Set a different host port first if `5432` is occupied, then create the standalone development container:
+
+```bash
+export POSTGRES_PORT=${POSTGRES_PORT:-5432}
+docker run --name internal-operations-postgres --detach \
+  --publish "127.0.0.1:${POSTGRES_PORT}:5432" \
+  --env POSTGRES_DB=internal_operations \
+  --env POSTGRES_USER=internal_operations \
+  --env POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+  --volume internal-operations-postgres:/var/lib/postgresql/data \
+  --health-cmd='pg_isready -U internal_operations -d internal_operations' \
+  --health-interval=5s \
+  --health-timeout=5s \
+  --health-retries=20 \
+  postgres:17-alpine
+
+docker inspect --format '{{.State.Health.Status}}' internal-operations-postgres
+docker logs internal-operations-postgres
+```
+
+Wait until the service reports `healthy`. PostgreSQL is available only on `127.0.0.1:${POSTGRES_PORT}`.
+
+### 4. Apply the PostgreSQL migrations
+
+```bash
+export POSTGRES_CONNECTION_STRING="Host=localhost;Port=${POSTGRES_PORT:-5432};Database=internal_operations;Username=internal_operations;Password=${POSTGRES_PASSWORD}"
+
+dotnet ef database update \
+  --project src/InternalOperations.Persistence.Migrations.PostgreSql \
+  --startup-project src/InternalOperations.Persistence.Migrations.PostgreSql \
+  --context ApplicationDbContext \
+  --connection "$POSTGRES_CONNECTION_STRING"
+```
+
+Migrations are explicit: starting a container never changes the schema silently.
+
+### 5. Configure local JWT and administrator seed
+
+The seed is opt-in and is accepted only in `Development`:
+
+```bash
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Jwt:Issuer" "https://issuer.example.test"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Jwt:Audience" "internal-operations-api"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Jwt:SigningKey" "<at-least-32-byte-development-signing-key>"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Seed:Enabled" "true"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Seed:AdministratorIdentifier" "<development-admin-email>"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Seed:AdministratorPassword" "<strong-development-admin-password>"
+dotnet user-secrets --project src/InternalOperations.Api set "Authentication:Seed:AdministratorDisplayName" "Development Administrator"
+```
+
+### 6. Run the API from the Mac
+
+```bash
+export ASPNETCORE_ENVIRONMENT=Development
+export ASPNETCORE_URLS=http://localhost:5080
+export Database__Provider=PostgreSql
+export ConnectionStrings__PostgreSql="$POSTGRES_CONNECTION_STRING"
+
+dotnet run --project src/InternalOperations.Api --no-launch-profile
+```
+
+Keep that terminal open. On first startup the idempotent Development seed creates the administrator account configured above.
+
+### 7. Verify health and authentication
+
+In a second terminal:
+
+```bash
+curl --fail http://localhost:5080/health/live
+curl --fail http://localhost:5080/health/ready
+
+curl --request POST http://localhost:5080/api/v1/auth/login \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "identifier": "<development-admin-email>",
+    "password": "<strong-development-admin-password>",
+    "deviceDescription": "Apple Silicon Mac"
+  }'
+```
+
+Both health endpoints must report `Healthy`; login returns the JWT access token and rotating refresh token used by protected endpoints.
+
+### 8. Stop or reset the database
+
+Stop containers while preserving local data:
+
+```bash
+docker stop internal-operations-postgres
+```
+
+Resume it later with `docker start internal-operations-postgres`.
+
+Delete the local PostgreSQL container, volume and all development data:
+
+```bash
+docker rm --force internal-operations-postgres
+docker volume rm internal-operations-postgres
+```
+
+After deleting the volume, repeat the migration step before starting the API. See the [operations runbook](docs/operations-runbook.md) for the fully containerized API workflow and troubleshooting.
 
 ## Validate the backend
 

@@ -1,19 +1,12 @@
-# Backend Operations Runbook
+# Full-Stack Showcase Operations Runbook
 
 ## Scope
 
-This runbook starts the Fiverr showcase with PostgreSQL and validates that the API is ready. It intentionally avoids production-platform-specific deployment machinery.
+This runbook starts the Fiverr showcase with Next.js, ASP.NET Core and PostgreSQL. It intentionally avoids production-platform-specific deployment machinery.
 
-## Required environment
+## Prerequisite
 
-```bash
-export POSTGRES_PASSWORD='<local-demo-password>'
-export JWT_ISSUER='https://issuer.example.test'
-export JWT_AUDIENCE='internal-operations-api'
-export JWT_SIGNING_KEY='<at-least-32-byte-local-demo-signing-key>'
-```
-
-Do not commit `.env` files, connection strings, passwords or signing keys.
+Install and start Docker Desktop. The supplied images support Apple Silicon and x86-64 hosts.
 
 ## Local verification
 
@@ -23,57 +16,65 @@ dotnet restore InternalOperations.slnx --locked-mode
 dotnet format InternalOperations.slnx --verify-no-changes --no-restore
 dotnet build InternalOperations.slnx --configuration Release --no-restore -p:ContinuousIntegrationBuild=true
 dotnet test InternalOperations.slnx --configuration Release --no-build --no-restore --filter "Category!=ProviderMatrix"
+
+cd frontend
+npm ci
+npm audit --audit-level=high
+npm test
+npm run typecheck
+npm run lint
+npm run build
+cd ..
 ```
 
 ## Start the demo
 
-Start PostgreSQL first:
-
 ```bash
-docker compose up -d database
+chmod +x scripts/start-showcase.sh
+./scripts/start-showcase.sh
 ```
 
-Apply migrations explicitly from the host. This keeps schema changes visible rather than running them as a hidden side effect of every API replica:
+The script asks for the PostgreSQL and administrator passwords using hidden input. It generates the JWT signing key, writes the values only to the Git-ignored `.env.showcase` file with mode `600`, builds the images, applies PostgreSQL migrations through the one-shot `migrator` service and waits for API/frontend readiness.
 
-```bash
-export POSTGRES_CONNECTION_STRING="Host=localhost;Port=${POSTGRES_PORT:-5432};Database=internal_operations;Username=internal_operations;Password=${POSTGRES_PASSWORD}"
-
-dotnet ef database update \
-  --project src/InternalOperations.Persistence.Migrations.PostgreSql \
-  --startup-project src/InternalOperations.Persistence.Migrations.PostgreSql \
-  --context ApplicationDbContext \
-  --connection "$POSTGRES_CONNECTION_STRING"
-```
-
-Build and start the API:
-
-```bash
-docker compose up -d --build api
-```
+PostgreSQL, API and frontend ports bind exclusively to `127.0.0.1`. This is a local HTTP showcase, not an internet-facing deployment.
 
 ## Verify runtime health
 
 ```bash
 curl --fail http://localhost:${API_PORT:-8080}/health/live
 curl --fail http://localhost:${API_PORT:-8080}/health/ready
+curl --fail http://localhost:${FRONTEND_PORT:-3000}
 ```
 
-- `live` proves the process can answer requests.
-- `ready` returns HTTP 200 only when the configured database is reachable.
+- `live` proves the API process can answer requests.
+- `ready` returns HTTP 200 only when PostgreSQL is reachable.
 - API errors use ProblemDetails; unhandled exceptions are logged without returning stack traces.
+- Login at the frontend with the email and password entered during installation.
 
-OpenAPI and Scalar are Development-only. For a local interactive demo, run the API with `ASPNETCORE_ENVIRONMENT=Development` and external development-only credentials.
-
-## Stop or reset
+## Inspect, stop or resume
 
 ```bash
-docker compose down
-docker compose down --volumes # destructive: removes local demo data
+docker compose --env-file .env.showcase ps
+docker compose --env-file .env.showcase logs -f frontend api migrator database
+docker compose --env-file .env.showcase stop
+docker compose --env-file .env.showcase start
 ```
+
+## Reset
+
+The following command removes containers, the PostgreSQL volume and `.env.showcase`, then asks for fresh credentials:
+
+```bash
+./scripts/start-showcase.sh --reset
+```
+
+This is destructive and intended only for disposable showcase data.
 
 ## Troubleshooting
 
-- `ready` returns 503: verify PostgreSQL health, connection string and network.
-- API fails during startup: verify JWT issuer, audience and a signing key of at least 32 bytes.
-- Tables are missing: rerun the explicit `dotnet ef database update` command.
+- `ready` returns 503: inspect `database` and `migrator` logs.
+- API fails during startup: inspect JWT configuration and the Development seed logs.
+- Frontend login returns a service error: verify the `api` service is healthy.
+- Ports are occupied: set `POSTGRES_PORT`, `API_PORT` or `FRONTEND_PORT` before running the script.
+- Existing credentials should change: use `--reset`; do not edit a running PostgreSQL stack to change only its environment password.
 - Provider behavior is uncertain: inspect the latest GitHub Actions provider-matrix run; do not substitute InMemory evidence for PostgreSQL or SQL Server.
